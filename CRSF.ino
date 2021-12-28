@@ -1,5 +1,16 @@
+// Simple Arduino trasmisster
+// Arduino Nano
+// ELRS 2.4G TX moduel
+// Custom PCB from JLCPCB
+// const float codeVersion = 0.8; // Software revision
 
+// =======================================================================================================
+// BUILD OPTIONS (comment out unneeded options)
+// =======================================================================================================
 
+//#define DEBUG // if not commented out, Serial.print() is active! For debugging only!!
+
+// =======================================================================================================
 /*
  * CRSF protocol
  *
@@ -28,7 +39,6 @@
  * CRC:            (uint8_t)
  *
  */
-//#include "crossfire.h"
 // Device address & type
 #define RADIO_ADDRESS                  0xEA
 #define ADDR_MODULE                    0xEE  //  Crossfire transmitter
@@ -38,6 +48,13 @@
 #define RC_CHANNEL_MIN 172
 #define RC_CHANNEL_MID 991
 #define RC_CHANNEL_MAX 1811
+
+// Define RC input Offset
+int Aileron_OFFSET = 0;        // values read from the pot 
+int Elevator_OFFSET  = 0; 
+int Throttle_OFFSET =0;
+int Rudder_OFFSET  = 0; 
+
 
 // internal crsf variables
 #define CRSF_TIME_NEEDED_PER_FRAME_US   1100 // 700 ms + 400 ms for potential ad-hoc request
@@ -57,12 +74,23 @@
 #define CRSF_FRAME_LENGTH 24;   // length of type + payload + crc
 
 //pins that used for the Joystick
-const int analogInPinY = A0; // 
-const int analogInPinX = A1;// 
+const int analogInPinAileron = A3;
+const int analogInPinElevator = A4; 
+const int analogInPinThrottle = A6;
+const int analogInPinRudder = A5; 
 int Aileron_value = 0;        // values read from the pot 
 int Elevator_value = 0; 
 int Throttle_value=0;
 int Rudder_value = 0; 
+
+//pins that used for the switch
+const int DigitalInPinArm = 10;  // Arm switch
+const int DigitalInPinMode = 9;  // 
+const int DigitalInPinLED = 12;  // 
+
+int Arm = 0;        // values read from the pot 
+int FlightMode = 0; 
+
 
 
 // crc implementation from CRSF protocol document rev7
@@ -138,50 +166,82 @@ void crsfPreparePacket(uint8_t packet[], int channels[]){
 }
 
 
-
-
-
 uint8_t crsfPacket[CRSF_PACKET_SIZE];
 int rcChannels[CRSF_MAX_CHANNEL];
 uint32_t crsfTime = 0;
-uint8_t crsfPacket1[26] = {0x0F, 0x00, 0x34, 0x1F, 0xA8, 0x09, 0x08, 0x6A, 0x50, 0x03,0x10, 0x80, 0x00,
-                             0x04, 0x20, 0x00, 0x01, 0x08, 0x07, 0x38, 0x00, 0x10, 0x80, 0x00, 0x04,0x00};
-uint8_t crsfPacket2[26] = {0x6E, 0x77, 0x90, 0x0C, 0xA5, 0x8B, 0x14, 0x9D, 0x27, 0x1D,0x3B, 0x90, 0x81,
-                             0x1F, 0xC4, 0x03, 0x3F, 0x7F, 0xF0, 0xA0, 0x14, 0x23, 0x80, 0x00, 0x04,0x00};
+
+
 
 void setup() {
     for (uint8_t i = 0; i < CRSF_MAX_CHANNEL; i++) {
         rcChannels[i] = RC_CHANNEL_MIN;
     }
-    rcChannels[2] = RC_CHANNEL_MIN; // Throttle
-    rcChannels[3] = RC_CHANNEL_MID; // Thrust
-
+    
     delay(1000);
     Serial.begin(SERIAL_BAUDRATE);
    // Serial.write(crsfPacket1, CRSF_PACKET_SIZE);
+   // pull up digital pin
+   pinMode(DigitalInPinArm, INPUT_PULLUP);
+   pinMode(DigitalInPinMode, INPUT_PULLUP);
+   pinMode(DigitalInPinLED, OUTPUT);
+
 }
 
 void loop() {
     uint32_t currentMicros = micros();
+    digitalWrite(DigitalInPinLED, HIGH);
     /*
-     * Here you can modify values of rcChannels while keeping it in 1000:2000 range
+     * Here you can modify values of rcChannels
      */
-    Aileron_value = analogRead(analogInPinX); 
-    Elevator_value= analogRead(analogInPinY); 
-    rcChannels[0] = map(Aileron_value,0,677,RC_CHANNEL_MIN,RC_CHANNEL_MAX);
-    rcChannels[1] = map(Elevator_value,0,677,RC_CHANNEL_MIN,RC_CHANNEL_MAX);
-    //rcChannels[0] = 600;
-    //rcChannels[1] = 600;
+    Aileron_value = analogRead(analogInPinAileron)+Aileron_OFFSET; 
+    Elevator_value= analogRead(analogInPinElevator)+Elevator_OFFSET; 
+    Throttle_value=analogRead(analogInPinThrottle)+Throttle_OFFSET; 
+    Rudder_value = analogRead(analogInPinRudder)+Rudder_OFFSET; 
+    Arm = digitalRead(DigitalInPinArm);
+    FlightMode = digitalRead(DigitalInPinMode);
+    rcChannels[0] = map(Aileron_value,999,73,RC_CHANNEL_MIN,RC_CHANNEL_MAX); //reverse
+    rcChannels[1] = map(Elevator_value,895,47,RC_CHANNEL_MIN,RC_CHANNEL_MAX); //reverse
+    rcChannels[2] = map(Throttle_value,66,914,RC_CHANNEL_MIN,RC_CHANNEL_MAX);
+    rcChannels[3] = map(Rudder_value ,52,935,RC_CHANNEL_MIN,RC_CHANNEL_MAX);
+
+    if(Arm==0){
+      rcChannels[4] =RC_CHANNEL_MAX;
+    }else if(Arm==1){
+      rcChannels[4] =RC_CHANNEL_MIN;
+    }
+
+   if(FlightMode==1){
+      rcChannels[5] =RC_CHANNEL_MAX;
+    }else if(FlightMode==0){
+      rcChannels[5] =RC_CHANNEL_MIN;
+    }
+    //rcChannels[0] = Aileron_value;
+   // rcChannels[1] = Elevator_value;
+    //rcChannels[2] = Throttle_value;
+    //rcChannels[3] = Rudder_value;
 //  transmit_enable=!digitalRead(transmit_pin);
   
     if (currentMicros > crsfTime) {
         crsfPreparePacket(crsfPacket, rcChannels);
-        Serial.write(crsfPacket, CRSF_PACKET_SIZE);
-
-      // Serial.println(rcChannels[0]); 
-      // Serial.println(rcChannels[1]); 
-     //  Serial.println(rcChannels[2]); 
-      // Serial.println(rcChannels[3]); 
+       #ifdef DEBUG
+        Serial.print("A"); 
+        Serial.print(Aileron_value); 
+        Serial.print(" E"); 
+        Serial.print(Elevator_value); 
+        Serial.print(" T"); 
+        Serial.print(Throttle_value);
+        Serial.print(" R");  
+        Serial.print(Rudder_value);
+        Serial.print(" Arm");  
+        Serial.print(Arm);
+        Serial.print(" Mode");  
+        Serial.print(FlightMode);
+        Serial.println();  
+        delay(1000);
+       #else
+         Serial.write(crsfPacket, CRSF_PACKET_SIZE);
+       #endif
+       
         crsfTime = currentMicros + CRSF_TIME_BETWEEN_FRAMES_US;
     }
 }
