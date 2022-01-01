@@ -13,4 +13,14 @@ Otherwise you need to use a digital revese cycle for example a NOT gate SN74LS06
 
 I need more test to see if it works stable.
 
-This is still a working process project.
+This is still a working process project. 
+
+![IMG_20211231_230305](https://user-images.githubusercontent.com/43392862/147845208-0726187d-0374-496a-80d1-303791e30d3f.jpg)
+![IMG_20211228_215915](https://user-images.githubusercontent.com/43392862/147845211-86a539c5-958d-44ce-be10-5ccce836f60c.jpg)
+![IMG_20211227_221222](https://user-images.githubusercontent.com/43392862/147845217-37778ccd-7a42-4e84-9291-ddd86a3ed9e5.jpg)
+![IMG_20211227_213607](https://user-images.githubusercontent.com/43392862/147845218-07ae3f93-578e-45b4-b0da-48cd59fea7bb.jpg)
+
+
+Some code are based on  Pawel's amazing on SBUS generate code.
+
+https://quadmeup.com/generate-s-bus-with-arduino-in-a-simple-way/
