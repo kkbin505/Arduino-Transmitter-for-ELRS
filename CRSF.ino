@@ -3,6 +3,7 @@
 // ELRS 2.4G TX moduel
 // Custom PCB from JLCPCB
 // const float codeVersion = 0.8; // Software revision
+// https://github.com/kkbin505/Arduino-Transmitter-for-ELRS
 
 // =======================================================================================================
 // BUILD OPTIONS (comment out unneeded options)
@@ -55,7 +56,6 @@ int Elevator_OFFSET  = 0;
 int Throttle_OFFSET =0;
 int Rudder_OFFSET  = 0; 
 
-
 // internal crsf variables
 #define CRSF_TIME_NEEDED_PER_FRAME_US   1100 // 700 ms + 400 ms for potential ad-hoc request
 //#define CRSF_TIME_BETWEEN_FRAMES_US     6667 // At fastest, frames are sent by the transmitter every 6.667 milliseconds, 150 Hz
@@ -88,9 +88,8 @@ const int DigitalInPinArm = 10;  // Arm switch
 const int DigitalInPinMode = 9;  // 
 const int DigitalInPinLED = 12;  // 
 
-int Arm = 0;        // values read from the pot 
+int Arm = 0;        // switch values read from the digital pin
 int FlightMode = 0; 
-
 
 
 // crc implementation from CRSF protocol document rev7
@@ -177,60 +176,62 @@ void setup() {
         rcChannels[i] = RC_CHANNEL_MIN;
     }
     
-    delay(1000);
+    delay(1000); //Give enough time for uploda firmware
     Serial.begin(SERIAL_BAUDRATE);
    // Serial.write(crsfPacket1, CRSF_PACKET_SIZE);
    // pull up digital pin
    pinMode(DigitalInPinArm, INPUT_PULLUP);
    pinMode(DigitalInPinMode, INPUT_PULLUP);
-   pinMode(DigitalInPinLED, OUTPUT);
+   pinMode(DigitalInPinLED, OUTPUT);//LED
+   digitalWrite(DigitalInPinLED, HIGH);
 
 }
 
 void loop() {
     uint32_t currentMicros = micros();
-    digitalWrite(DigitalInPinLED, HIGH);
+
     /*
      * Here you can modify values of rcChannels
      */
-    Aileron_value = analogRead(analogInPinAileron)+Aileron_OFFSET; 
-    Elevator_value= analogRead(analogInPinElevator)+Elevator_OFFSET; 
-    Throttle_value=analogRead(analogInPinThrottle)+Throttle_OFFSET; 
-    Rudder_value = analogRead(analogInPinRudder)+Rudder_OFFSET; 
+    Aileron_value = constrain(analogRead(analogInPinAileron),113,951); //My gimbal do not center, this function constrain end.
+    Elevator_value= analogRead(analogInPinElevator); 
+    Throttle_value=analogRead(analogInPinThrottle); 
+    Rudder_value = constrain(analogRead(analogInPinRudder),69,917);  //My gimbal do not center, this function constrain end.
     Arm = digitalRead(DigitalInPinArm);
     FlightMode = digitalRead(DigitalInPinMode);
-    rcChannels[0] = map(Aileron_value,999,73,RC_CHANNEL_MIN,RC_CHANNEL_MAX); //reverse
-    rcChannels[1] = map(Elevator_value,895,47,RC_CHANNEL_MIN,RC_CHANNEL_MAX); //reverse
+    rcChannels[0] = map(Aileron_value,951,113,RC_CHANNEL_MIN,RC_CHANNEL_MAX); //reverse
+    rcChannels[1] = map(Elevator_value,895,50,RC_CHANNEL_MIN,RC_CHANNEL_MAX); //reverse
     rcChannels[2] = map(Throttle_value,66,914,RC_CHANNEL_MIN,RC_CHANNEL_MAX);
-    rcChannels[3] = map(Rudder_value ,52,935,RC_CHANNEL_MIN,RC_CHANNEL_MAX);
-
+    rcChannels[3] = map(Rudder_value ,69,917,RC_CHANNEL_MIN,RC_CHANNEL_MAX);
+	
+	//Aux 1 Arm Channel
     if(Arm==0){
       rcChannels[4] =RC_CHANNEL_MAX;
     }else if(Arm==1){
       rcChannels[4] =RC_CHANNEL_MIN;
     }
 
-   if(FlightMode==1){
+	//Aux 1 Mode Channel
+    if(FlightMode==1){
       rcChannels[5] =RC_CHANNEL_MAX;
     }else if(FlightMode==0){
       rcChannels[5] =RC_CHANNEL_MIN;
     }
-    //rcChannels[0] = Aileron_value;
-   // rcChannels[1] = Elevator_value;
-    //rcChannels[2] = Throttle_value;
-    //rcChannels[3] = Rudder_value;
+
+	//Additional switch add here.
 //  transmit_enable=!digitalRead(transmit_pin);
   
     if (currentMicros > crsfTime) {
         crsfPreparePacket(crsfPacket, rcChannels);
-       #ifdef DEBUG
-        Serial.print("A"); 
+      //For gimal calibation only
+	  #ifdef DEBUG
+        Serial.print("A_"); 
         Serial.print(Aileron_value); 
-        Serial.print(" E"); 
+        Serial.print("E_"); 
         Serial.print(Elevator_value); 
-        Serial.print(" T"); 
+        Serial.print(" T_"); 
         Serial.print(Throttle_value);
-        Serial.print(" R");  
+        Serial.print(" R_");  
         Serial.print(Rudder_value);
         Serial.print(" Arm");  
         Serial.print(Arm);
