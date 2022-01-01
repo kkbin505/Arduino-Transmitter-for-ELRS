@@ -21,6 +21,6 @@ This is still a working process project.
 ![IMG_20211227_213607](https://user-images.githubusercontent.com/43392862/147845218-07ae3f93-578e-45b4-b0da-48cd59fea7bb.jpg)
 
 
-Some code are based on  Pawel's amazing on SBUS generate code.
+Some code are based on  Pawel's amazing work on SBUS generate code.
 
 https://quadmeup.com/generate-s-bus-with-arduino-in-a-simple-way/
