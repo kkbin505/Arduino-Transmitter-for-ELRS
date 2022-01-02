@@ -5,6 +5,8 @@ There are many amazing Expreslrs handset. But I want a simple arduino based tran
 
 I successfully made a TX with arduino nano. 
 
+https://youtu.be/PrfSfnqcBgk
+
 I replaced the control board in a DEVO 7 with arduino nano and DIY 2.4G elrs module, after some wiring and codeing and it works.
 
 Make sure to uncheck uart_reverse when upload firmware to TX module, because the board do not support reverse uart. 
