@@ -2,7 +2,8 @@
 // Arduino Nano
 // ELRS 2.4G TX moduel
 // Custom PCB from JLCPCB
-// const float codeVersion = 0.8; // Software revision
+// const float codeVersion = 0.9; // Software revision
+// V0.9 add config function (ELRS) power, fresh
 // https://github.com/kkbin505/Arduino-Transmitter-for-ELRS
 
 // =======================================================================================================
@@ -44,6 +45,16 @@
 #define RADIO_ADDRESS                  0xEA
 #define ADDR_MODULE                    0xEE  //  Crossfire transmitter
 #define TYPE_CHANNELS                  0x16
+// ELRS command
+#define ELRS_ADDRESS                   0xEE
+#define ELRS_BIND_COMMAND              0xFF
+#define ELRS_WIFI_COMMAND              0xFE
+#define ELRS_PKT_RATE_COMMAND          1
+#define ELRS_TLM_RATIO_COMMAND         2
+#define ELRS_POWER_COMMAND             3
+#define TYPE_SETTINGS_WRITE            0x2D
+#define ADDR_RADIO                     0xEA  //  Radio Transmitter
+
 
 // Define RC input limite
 #define RC_CHANNEL_MIN 172
@@ -58,8 +69,8 @@ int Rudder_OFFSET  = 0;
 
 // internal crsf variables
 #define CRSF_TIME_NEEDED_PER_FRAME_US   1100 // 700 ms + 400 ms for potential ad-hoc request
-//#define CRSF_TIME_BETWEEN_FRAMES_US     6667 // At fastest, frames are sent by the transmitter every 6.667 milliseconds, 150 Hz
-#define CRSF_TIME_BETWEEN_FRAMES_US     4000 // 4 ms 250Hz
+//#define CRSF_TIME_BETWEEN_FRAMES_US     6666 // At fastest, frames are sent by the transmitter every 6.667 milliseconds, 150 Hz
+#define CRSF_TIME_BETWEEN_FRAMES_US     4000 // 4 ms 250Hz @ BAUD 115200 
 #define CRSF_DIGITAL_CHANNEL_MIN 172
 #define CRSF_DIGITAL_CHANNEL_MAX 1811
 #define CRSF_PAYLOAD_OFFSET offsetof(crsfFrameDef_t, type)
@@ -71,26 +82,67 @@ int Rudder_OFFSET  = 0;
 #define CRSF_PAYLOAD_SIZE_MAX   60
 #define CRSF_PACKET_LENGTH 22
 #define CRSF_PACKET_SIZE  26
+#define CRSF_CMD_PACKET_SIZE  8
 #define CRSF_FRAME_LENGTH 24;   // length of type + payload + crc
 
 //pins that used for the Joystick
-const int analogInPinAileron = A3;
-const int analogInPinElevator = A4; 
+const int analogInPinAileron = A0;
+const int analogInPinElevator = A1; 
 const int analogInPinThrottle = A6;
 const int analogInPinRudder = A5; 
 int Aileron_value = 0;        // values read from the pot 
 int Elevator_value = 0; 
 int Throttle_value=0;
 int Rudder_value = 0; 
+int cmd=0;
 
 //pins that used for the switch
-const int DigitalInPinArm = 10;  // Arm switch
-const int DigitalInPinMode = 9;  // 
+const int DigitalInPinArm = 2;  // Arm switch
+const int DigitalInPinMode = 3;  // 
+const int DigitalInPinRateChange = 5;  // 
+const int DigitalInPinPowerChange = 4;  // 
 const int DigitalInPinLED = 12;  // 
 
 int Arm = 0;        // switch values read from the digital pin
 int FlightMode = 0; 
+int rateButtonPressed=0;
+int powerButtonPressed=0;
+boolean rateChangeHasRun = false;
+boolean powerChangeHasRun = false;
 
+// from https://github.com/DeviationTX/deviation/pull/1009/ ELRS menu implement in deviation TX
+static u8  currentPktRate =1; //  "250Hz", "150Hz", "50Hz"
+  //                                1         3       5      
+static u8  currentPower =1 ;//  "10mW", "25mW", "50mW", "100mW", "250mW"
+  //                               0     1         2        3        4   
+static u8 currentTlmRatio =0 ;
+static u8 currentBind = 0;
+static u8 currentWiFi = 0;
+static u8 getParamsCounter = 0;
+static u8 currentFrequency = 6;
+
+
+
+static u16 convertPktRateToPeriod(u8 rfFreq, u8 rate)
+{
+  if (rfFreq == 0) return CRSF_TIME_BETWEEN_FRAMES_US;
+  switch (rate) {
+    case 0:
+      if (rfFreq == 6) return 2000;
+      return 5000;
+    case 1:
+      if (rfFreq == 6) return 4000;
+      return 10000;
+    case 2:
+      if (rfFreq == 6) return 6666;
+      return 20000;
+    case 3:
+      if (rfFreq == 6) return 20000;
+      return 40000;
+    case 4: return 40000;
+  }
+  return CRSF_TIME_BETWEEN_FRAMES_US;
+}
 
 // crc implementation from CRSF protocol document rev7
 static u8 crsf_crc8tab[256] = {
@@ -159,16 +211,30 @@ void crsfPreparePacket(uint8_t packet[], int channels[]){
     packet[23] = (uint8_t) ((channels[14] & 0x07FF)>>6  | (channels[15] & 0x07FF)<<5);
     packet[24] = (uint8_t) ((channels[15] & 0x07FF)>>3);
     
-    packet[25] = crsf_crc8(&packet[2], CRSF_PACKET_SIZE-3); //CRC
+    packet[25] = crsf_crc8(&packet[2], packet[1]-1); //CRC
 
 
 }
-
 
 uint8_t crsfPacket[CRSF_PACKET_SIZE];
 int rcChannels[CRSF_MAX_CHANNEL];
 uint32_t crsfTime = 0;
 
+
+
+uint8_t crsfCmdPacket[CRSF_CMD_PACKET_SIZE];
+void buildElrsPacket(uint8_t packetCmd[],u8 command, u8 value)
+{
+  packetCmd[0] = ADDR_MODULE;
+  packetCmd[1] = 6; // length of Command (4) + payload + crc
+  packetCmd[2] = TYPE_SETTINGS_WRITE;
+  packetCmd[3] = ELRS_ADDRESS;
+  packetCmd[4] = ADDR_RADIO;
+  packetCmd[5] = command;
+  packetCmd[6] = value;
+  packetCmd[7] = crsf_crc8(&packetCmd[2], packetCmd[1]-1);
+
+}
 
 
 void setup() {
@@ -182,8 +248,17 @@ void setup() {
    // pull up digital pin
    pinMode(DigitalInPinArm, INPUT_PULLUP);
    pinMode(DigitalInPinMode, INPUT_PULLUP);
+   pinMode(DigitalInPinRateChange,INPUT_PULLUP);
+   pinMode(DigitalInPinPowerChange,INPUT_PULLUP);
    pinMode(DigitalInPinLED, OUTPUT);//LED
    digitalWrite(DigitalInPinLED, HIGH);
+  // if(cmd=0){
+   // Setup ELRS Module
+   //buildElrsPacket(crsfCmdPacket,ELRS_PKT_RATE_COMMAND,currentPktRate);
+  // Serial.write(crsfCmdPacket, CRSF_CMD_PACKET_SIZE);
+   //delay(20);
+   //cmd =1;
+  //}
 
 }
 
@@ -199,10 +274,12 @@ void loop() {
     Rudder_value = constrain(analogRead(analogInPinRudder),69,917);  //My gimbal do not center, this function constrain end.
     Arm = digitalRead(DigitalInPinArm);
     FlightMode = digitalRead(DigitalInPinMode);
-    rcChannels[0] = map(Aileron_value,951,113,RC_CHANNEL_MIN,RC_CHANNEL_MAX); //reverse
-    rcChannels[1] = map(Elevator_value,895,50,RC_CHANNEL_MIN,RC_CHANNEL_MAX); //reverse
+    rcChannels[0] = map(Aileron_value,0,1023,RC_CHANNEL_MIN,RC_CHANNEL_MAX); //reverse
+    rcChannels[1] = map(Elevator_value,1023,0,RC_CHANNEL_MIN,RC_CHANNEL_MAX); //reverse
     rcChannels[2] = map(Throttle_value,66,914,RC_CHANNEL_MIN,RC_CHANNEL_MAX);
     rcChannels[3] = map(Rudder_value ,69,917,RC_CHANNEL_MIN,RC_CHANNEL_MAX);
+    //rcChannels[2] = RC_CHANNEL_MIN;
+    //rcChannels[3] = RC_CHANNEL_MID;
 	
 	//Aux 1 Arm Channel
     if(Arm==0){
@@ -219,8 +296,32 @@ void loop() {
     }
 
 	//Additional switch add here.
+
+    //Change elrs package rate
+    rateButtonPressed = digitalRead(DigitalInPinRateChange);
+    if(rateButtonPressed==0){
+      // Setup ELRS Module
+      if(rateChangeHasRun==false){
+        buildElrsPacket(crsfCmdPacket,ELRS_PKT_RATE_COMMAND,currentPktRate);
+        Serial.write(crsfCmdPacket, CRSF_CMD_PACKET_SIZE);
+        delay(4);
+        rateChangeHasRun=true;
+      }
+    }
+    //Change elrs output power
+    powerButtonPressed = digitalRead(DigitalInPinPowerChange);
+    if(powerButtonPressed==0){
+      // Setup ELRS Module
+      if(powerChangeHasRun==false){
+        buildElrsPacket(crsfCmdPacket,ELRS_POWER_COMMAND,currentPower);
+        Serial.write(crsfCmdPacket, CRSF_CMD_PACKET_SIZE);
+        delay(4);
+        powerChangeHasRun=true;
+      }
+    }
+    
 //  transmit_enable=!digitalRead(transmit_pin);
-  
+
     if (currentMicros > crsfTime) {
         crsfPreparePacket(crsfPacket, rcChannels);
       //For gimal calibation only
