@@ -1,5 +1,32 @@
-# Arduino-Transmitter-for-ELRS
-Arduino based RC transmitter for ELRS external TX Module
+# Simple TX
+
+This is an Arduino based RC transmitter TX.
+Features:
+- Support ExpressLRS 2.4G external TX module
+- Serial communicatin （Up to 250Hz packet rate）
+- 4 analog channel
+- 4 AUX channel
+- M7 hall Gimbal
+
+Due to the hardware limitation of the ATMega328p, the follow functions are not supported:
+* The 328p do not support inverted UART (which OpenTX use), there are 2 options:
+	1. Tun  UART_INVERTED off.
+	2. Adding a digital invert IC (I tested with SN74LS06N)
+** Telemetray is off, 328p do not support half duplex.
+*** The 328p only support 115K baud, theoretical maxmum packet rate is 250Hz (115200/256bit per second, 4ms per frame). RC data apcket is 32byte=256bit.
+
+The uart logic voltage of ESP32 is 3.3V, my ATMega328p is 5V. However mine TX work fine, it seems ESP32 UART is 5V tolerance.
+
+#### Tips
+Default RC channel order is AETR, you can change channel order whatever you like, by changing the RC channel order.
+Current gimbal calibratin method is complex (but you need to do only once):
+- Enter debug mode by delete "//" before #define DEBUG
+- Flash with arduino IDE
+- Open serialmonitor change baud rate to 115200
+- Record max and min RC channel value and write in map() function (reverse order if neede)
+   example:map(Aileron_value,893,223,RC_CHANNEL_MIN,RC_CHANNEL_MAX)
+- Add "//" back before #define DEBUG
+- Flash with arduino IDE
 
 There are many amazing Expreslrs handset. But I want a simple arduino based transmitter for my DIY 2.4G external TX module.
 
