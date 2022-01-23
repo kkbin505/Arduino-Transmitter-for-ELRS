@@ -1,3 +1,7 @@
+
+This Transmitter is inspired by cruwaller， you can find the 3D shell file in this repo:
+https://github.com/cruwaller/elrs_handset
+
 # Simple TX
 
 This is an Arduino based RC transmitter TX.
@@ -7,6 +11,8 @@ Features:
 - 4 analog channel
 - 4 AUX channel
 - M7 hall Gimbal
+
+![微信图片_20220123195009](https://user-images.githubusercontent.com/43392862/150677087-87a9d849-5e43-41d2-8526-66564b54dd8e.jpg)
 
 Due to the hardware limitation of the ATMega328p, the follow functions are not supported:
 * The 328p do not support inverted UART (which OpenTX use), there are 2 options:
@@ -31,6 +37,22 @@ Current gimbal calibratin method is complex (but you need to do only once):
 There are many amazing Expreslrs handset. But I want a simple arduino based transmitter for my DIY 2.4G external TX module.
 
 https://youtu.be/PrfSfnqcBgk
+
+### Add PCB V0.9
+
+
+I replace the control board with my PCB and system.
+
+
+![微信图片_20220123194957](https://user-images.githubusercontent.com/43392862/150677103-29b24170-f48c-4ca5-b79e-a7999f069549.jpg)
+
+
+![微信图片_20220123195005](https://user-images.githubusercontent.com/43392862/150677082-80ab29c4-f2e4-475e-a4b3-db004aeacba5.jpg)
+
+
+
+
+### Below is old prototype
 
 I replaced the control board in a DEVO 7 with arduino nano and DIY 2.4G Elrs module, after some wiring and codeing and it works.
 
