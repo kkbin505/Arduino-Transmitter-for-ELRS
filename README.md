@@ -44,8 +44,6 @@ https://youtu.be/PrfSfnqcBgk
 I replace the control board with my PCB and system.
 
 
-![微信图片_20220123194957](https://user-images.githubusercontent.com/43392862/150677103-29b24170-f48c-4ca5-b79e-a7999f069549.jpg)
-
 
 ![微信图片_20220123195005](https://user-images.githubusercontent.com/43392862/150677082-80ab29c4-f2e4-475e-a4b3-db004aeacba5.jpg)
 
