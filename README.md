@@ -15,11 +15,11 @@ Now you can enter setting 1 and 2 by gesutre:
 
 Setting 1:
 
-Hold AILERON left and ELEVATOR down when power up.
+Hold AILERON left and ELEVATOR down at power up.
 
 Setting 2:
 
-Hold AILERON right and ELEVATOR up when power up.
+Hold AILERON right and ELEVATOR up at power up.
 
 Center stick will keep your last setting.
 
