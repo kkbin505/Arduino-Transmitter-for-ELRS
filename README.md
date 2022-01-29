@@ -10,13 +10,14 @@ Setting 1:
 
 Setting 2:
 //150Hz 100mW
-You can change to your need.
 
 Now you can enter setting 1 and 2 by gesutre:
 Setting 1:
+
 Hold AILERON left and ELEVATOR down when power up.
 
 Setting 2:
+
 Hold AILERON right and ELEVATOR up when power up.
 
 Center stick will keep your last setting.
