@@ -2,7 +2,7 @@
 This Transmitter is inspired by cruwaller， you can find the 3D shell file in this repo:
 https://github.com/cruwaller/elrs_handset
 
-### Updat Log V0.9.1
+### Update Log V0.9.1
 Add 2 pre settings for power and package rate:
 
 Setting 1:
