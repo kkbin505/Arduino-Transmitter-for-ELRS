@@ -71,7 +71,7 @@ static uint8_t currentFrequency = 6; //2.4G
 #define SETTING_1_Power 2    //50mW
 
 #define SETTING_2_PktRate 3  //150Hz
-#define SETTING_2_Power 3    //100wW
+#define SETTING_2_Power 3    //100mW
 
 enum chan_order{
     AILERON,
