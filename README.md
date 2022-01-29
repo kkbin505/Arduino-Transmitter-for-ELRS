@@ -4,6 +4,7 @@ https://github.com/cruwaller/elrs_handset
 
 ### Updat Log V0.9.1
 Add 2 pre settings for power and package rate:
+
 Setting 1:
 //250Hz 50mW
 
