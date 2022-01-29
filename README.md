@@ -12,6 +12,7 @@ Setting 2:
 //150Hz 100mW
 
 Now you can enter setting 1 and 2 by gesutre:
+
 Setting 1:
 
 Hold AILERON left and ELEVATOR down when power up.
