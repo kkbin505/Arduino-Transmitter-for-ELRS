@@ -5,23 +5,20 @@ https://github.com/cruwaller/elrs_handset
 ### Update Log V0.9.1
 Add 2 pre settings for power and package rate:
 
-Setting 1:
-//250Hz 50mW
-
-Setting 2:
-//150Hz 100mW
 
 Now you can enter setting 1 and 2 by gesutre:
 
 Setting 1:
+//250Hz 50mW
 
 Hold AILERON left and ELEVATOR down at power up.
 
 Setting 2:
+//150Hz 100mW
 
 Hold AILERON right and ELEVATOR up at power up.
 
-Center stick will keep your last setting.
+Center stick will keep your previous setting.
 
 # Simple TX
 
