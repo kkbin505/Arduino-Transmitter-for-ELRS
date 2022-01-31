@@ -15,6 +15,7 @@ BOM :
 12. 2.4G SMA antenna
 13. ExpressLRS 2.4G TX module
 14. 2S battery
+15. PCB https://oshwlab.com/kkbinmail/arduino_transmitter
 
 Build order:
 
