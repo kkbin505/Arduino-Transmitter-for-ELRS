@@ -33,11 +33,14 @@ Features:
 ![微信图片_20220123195009](https://user-images.githubusercontent.com/43392862/150677087-87a9d849-5e43-41d2-8526-66564b54dd8e.jpg)
 
 Due to the hardware limitation of the ATMega328p, the follow functions are not supported:
+
 * The 328p do not support inverted UART (which OpenTX use), there are 2 options:
 	1. Tun  UART_INVERTED off.
 	2. Adding a digital invert IC (I tested with SN74LS06N)
+
 ** Telemetray is off, 328p do not support half duplex.
-*** The 328p only support 115K baud, theoretical maxmum packet rate is 250Hz (115200/256bit per second, 4ms per frame). RC data apcket is 32byte=256bit.
+
+*** The 328p only support 115K baud, theoretical maxmum packet rate is 250Hz (115200/320bit per second, 4ms per frame). RC data apcket is 32byte=320bit(plus 1 start bit and 1 end bit).
 
 The uart logic voltage of ESP32 is 3.3V, my ATMega328p is 5V. However mine TX work fine, it seems ESP32 UART is 5V tolerance.
 
