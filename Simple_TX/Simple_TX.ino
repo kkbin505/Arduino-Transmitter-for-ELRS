@@ -146,7 +146,7 @@ void loop() {
         loopCount++;
       }
       else if (loopCount > 200 && loopCount < 400){
-        if (currentSetting <0){
+        if (currentSetting >0){
           buildElrsPacket(crsfCmdPacket,ELRS_POWER_COMMAND,currentPower);
           Serial.write(crsfCmdPacket, CRSF_CMD_PACKET_SIZE);
         }
