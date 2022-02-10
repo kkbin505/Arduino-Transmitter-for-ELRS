@@ -4,7 +4,7 @@
 // Arduino Nano
 // ELRS 2.4G TX moduel
 // Custom PCB from JLCPCB
-// const float codeVersion = 0.9.1; // Software revision
+// const float codeVersion = 0.92; // Software revision
 // https://github.com/kkbin505/Arduino-Transmitter-for-ELRS
 
  * This file is part of Simple TX
@@ -32,7 +32,6 @@
  #include "config.h"
  #include "crsf.c"
  #include "led.h"
- #include "battery.h"
  
 
 int Aileron_value = 0;        // values read from the pot 
@@ -40,14 +39,14 @@ int Elevator_value = 0;
 int Throttle_value=0;
 int Rudder_value = 0; 
 
-int loopCount=0;
+int loopCount=0;   // for ELRS seeting
 
 int Arm = 0;        // switch values read from the digital pin
 int AUX2_value = 0; 
 int AUX3_value = 0; 
 int AUX4_value = 0; 
 
-float batteryVoltage;
+float batteryVoltage; 
 
 int currentPktRate = 0;
 int currentPower = 0;
@@ -59,26 +58,26 @@ uint32_t crsfTime = 0;
 
 
 void setup() {
+    //inialize rc data
     for (uint8_t i = 0; i < CRSF_MAX_CHANNEL; i++) {
-        rcChannels[i] = RC_CHANNEL_MIN;
+        rcChannels[i] = CRSF_DIGITAL_CHANNEL_MIN;
     }
+
    analogReference(EXTERNAL);
    pinMode(DIGITAL_PIN_SWITCH_ARM, INPUT_PULLUP);
    pinMode(DIGITAL_PIN_SWITCH_AUX2, INPUT_PULLUP);
-   //pinMode(DIGITAL_PIN_SWITCH_AUX3, INPUT_PULLUP);
-   pinMode(DIGITAL_PIN_SWITCH_AUX4, INPUT_PULLUP);
+   pinMode(DIGITAL_PIN_SWITCH_AUX3, INPUT_PULLUP);
+   //pinMode(DIGITAL_PIN_SWITCH_AUX4, INPUT_PULLUP);
    pinMode(DIGITAL_PIN_LED, OUTPUT);//LED
    pinMode(DIGITAL_PIN_BUZZER, OUTPUT);//LED
    //digitalWrite(DIGITAL_PIN_BUZZER, LOW);
-   batteryVoltage=7.0; 
+   //inialize voltage:
+   batteryVoltage=0.0; 
    
    delay(1000); //Give enough time for uploda firmware
    Serial.begin(SERIAL_BAUDRATE);
-   // Serial.write(crsfPacket1, CRSF_PACKET_SIZE);
 
    digitalWrite(DIGITAL_PIN_LED, HIGH); //LED ON
-
-   
 
 }
 
@@ -89,55 +88,65 @@ void loop() {
     batteryVoltage=analogRead(VOLTAGE_READ_PIN)/103.0;
 
     if (batteryVoltage<WARNING_VOLTAGE){
-       fastBlinkLED(DIGITAL_PIN_LED);
+       slowBlinkLED(DIGITAL_PIN_LED);
+       // fastBlinkLED(DIGITAL_PIN_LED);
     }
- // fastBlinkLED(DIGITAL_PIN_LED);
+    
     /*
-     * Here you can modify values of rcChannels
+     * Handel analogy input
      */
-    Aileron_value = constrain(analogRead(analogInPinAileron),223,893); //My gimbal do not center, this function constrain end.
-    Elevator_value= constrain(analogRead(analogInPinElevator),130,778); 
-    Throttle_value=analogRead(analogInPinThrottle); 
-    Rudder_value = constrain(analogRead(analogInPinRudder),209,853);  //My gimbal do not center, this function constrain end.
+    //constrain to avoid overflow
+    Aileron_value = constrain(analogRead(analogInPinAileron)+Aileron_OFFSET,0,1023); 
+    Elevator_value= constrain(analogRead(analogInPinElevator)+Elevator_OFFSET,0,1023); 
+    Throttle_value=constrain(analogRead(analogInPinThrottle)+Throttle_OFFSET,0,1023); 
+    Rudder_value = constrain(analogRead(analogInPinRudder)+Rudder_OFFSET,0,1023);  
+    rcChannels[AILERON] = map(Aileron_value,1023,0,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX); 
+    rcChannels[ELEVATOR] = map(Elevator_value,1023,0,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX); 
+    rcChannels[THROTTLE] = map(Throttle_value,905,90,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX);//reverse
+    rcChannels[RUDDER] = map(Rudder_value ,0,1023,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX);
+
+     /*
+     * Handel digital input
+     */
     Arm = digitalRead(DIGITAL_PIN_SWITCH_ARM);
     AUX2_value = digitalRead(DIGITAL_PIN_SWITCH_AUX2);
-    //AUX3 = digitalRead(DIGITAL_PIN_SWITCH_AUX3);
-    AUX4_value = digitalRead(DIGITAL_PIN_SWITCH_AUX4);
-    rcChannels[AILERON] = map(Aileron_value,893,223,RC_CHANNEL_MIN,RC_CHANNEL_MAX); //reverse
-    rcChannels[ELEVATOR] = map(Elevator_value,130,778,RC_CHANNEL_MIN,RC_CHANNEL_MAX); 
-    rcChannels[THROTTLE] = map(Throttle_value,855,183,RC_CHANNEL_MIN,RC_CHANNEL_MAX);//reverse
-    rcChannels[RUDDER] = map(Rudder_value ,209,853,RC_CHANNEL_MIN,RC_CHANNEL_MAX);
-
+    AUX3_value = digitalRead(DIGITAL_PIN_SWITCH_AUX3);
+    //AUX4_value = digitalRead(DIGITAL_PIN_SWITCH_AUX4);// reuse for LED
     
 	//Aux 1 Arm Channel
     if(Arm==0){
-      rcChannels[AUX1] =RC_CHANNEL_MIN;
+      rcChannels[AUX1] =CRSF_DIGITAL_CHANNEL_MIN;
     }else if(Arm==1){
-      rcChannels[AUX1] =RC_CHANNEL_MAX;
+      rcChannels[AUX1] =CRSF_DIGITAL_CHANNEL_MAX;
     }
 
 	//Aux 2 Channel
-    if(AUX2_value==1){
-      rcChannels[AUX2] =RC_CHANNEL_MIN;
-    }else if(AUX2_value==0){
-      rcChannels[AUX2] =RC_CHANNEL_MAX;
+    if(AUX2_value==0){
+      rcChannels[AUX2] =CRSF_DIGITAL_CHANNEL_MIN;
+    }else if(AUX2_value==1){
+      rcChannels[AUX2] =CRSF_DIGITAL_CHANNEL_MAX;
     }
 
-    //Aux 4
-    if(AUX4_value==1){
-      rcChannels[AUX4] =RC_CHANNEL_MIN;
-    }else if(AUX4_value==0){
-      rcChannels[AUX4] =RC_CHANNEL_MAX;
+    //Aux 3
+    if(AUX3_value==0){
+      rcChannels[AUX3] =CRSF_DIGITAL_CHANNEL_MIN;
+    }else if(AUX4_value==1){
+      rcChannels[AUX3] =CRSF_DIGITAL_CHANNEL_MAX;
     }
 
 	//Additional switch add here.
-//  transmit_enable=!digitalRead(transmit_pin);
+  /*
+    if(AUX4_value==0){
+      rcChannels[AUX4] =CRSF_DIGITAL_CHANNEL_MIN;
+    }else if(AUX4_value==1){
+      rcChannels[AUX4] =CRSF_DIGITAL_CHANNEL_MAX;
+    }
+   */
 
-   selectProtocol();
-  // currentSetting=1;
+   selectSetting();
     if (currentMicros > crsfTime) {
 
-      if (loopCount<=200){
+      if (loopCount<=200){  //repeat 200 packets to build connection to TX module
         //Build commond packet
         if (currentSetting >0){
           buildElrsPacket(crsfCmdPacket,ELRS_PKT_RATE_COMMAND,currentPktRate);
@@ -145,9 +154,10 @@ void loop() {
         }
         loopCount++;
       }
-      else if (loopCount > 200 && loopCount < 400){
+      else if (loopCount > 200 && loopCount < 210){ // repeat 10 packets to avoid bad packet
         if (currentSetting >0){
           buildElrsPacket(crsfCmdPacket,ELRS_POWER_COMMAND,currentPower);
+          //buildElrsPacket(crsfCmdPacket, 17, 4); //for test only
           Serial.write(crsfCmdPacket, CRSF_CMD_PACKET_SIZE);
         }
         loopCount++;
@@ -175,7 +185,7 @@ void loop() {
         Serial.print(";Arm_");  
         Serial.print(Arm);
         Serial.print(";Mode_");  
-        Serial.print(AUX2);
+        Serial.print(AUX2_value);
         Serial.print("_BatteryVoltage:");  
         Serial.print(batteryVoltage);
         Serial.print("_CurrentSetting:");  
@@ -190,7 +200,7 @@ void loop() {
     }
 }
 
-void selectProtocol(){
+void selectSetting(){
 
     currentSetting =0;
     // startup stick commands (protocol selection / renew transmitter ID)
@@ -205,5 +215,4 @@ void selectProtocol(){
       currentPower = SETTING_2_Power;
       currentSetting =2;
     }
-    //reture Setting;
 }
