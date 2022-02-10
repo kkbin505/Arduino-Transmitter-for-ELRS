@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Simple TX.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Cleanflight.  If not, see <http://www.gnu.org/licenses/>.
  */
 /*
  =======================================================================================================
@@ -46,16 +46,7 @@
 #include "crsf.h"
 #include <stdint.h>
 
-// from https://github.com/DeviationTX/deviation/pull/1009/ ELRS menu implement in deviation TX
-static uint8_t  currentPktRate =1; //  "250Hz", "150Hz", "50Hz"
-  //                                1         3       5      
-static uint8_t  currentPower =1 ;//  "10mW", "25mW", "50mW", "100mW", "250mW"
-  //                               0     1         2        3        4   
-static uint8_t currentTlmRatio =0 ;
-static uint8_t currentBind = 0;
-static uint8_t currentWiFi = 0;
-static uint8_t getParamsCounter = 0;
-static uint8_t currentFrequency = 6; //2.4G
+
 
  // crc implementation from CRSF protocol document rev7
 static uint8_t crsf_crc8tab[256] = {
@@ -87,15 +78,12 @@ uint8_t crsf_crc8(const uint8_t *ptr, uint8_t len) {
 //prepare data packet
 void crsfPreparePacket(uint8_t packet[], int channels[]){
 
-    static int output[CRSF_MAX_CHANNEL] = {0};
-    const uint8_t crc = crsf_crc8(&packet[2], CRSF_PACKET_SIZE-3);
+    //const uint8_t crc = crsf_crc8(&packet[2], CRSF_PACKET_SIZE-3);
     /*
      * Map 1000-2000 with middle at 1500 chanel values to
      * 173-1811 with middle at 992 S.BUS protocol requires
-     */
-    for (uint8_t i = 0; i < CRSF_MAX_CHANNEL; i++) {
-        output[i] = map(channels[i], RC_CHANNEL_MIN, RC_CHANNEL_MAX, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);
-    }    
+     
+    */  
 
 
     // packet[0] = UART_SYNC; //Header
@@ -125,7 +113,7 @@ void crsfPreparePacket(uint8_t packet[], int channels[]){
     packet[23] = (uint8_t) ((channels[14] & 0x07FF)>>6  | (channels[15] & 0x07FF)<<5);
     packet[24] = (uint8_t) ((channels[15] & 0x07FF)>>3);
     
-    packet[25] = crsf_crc8(&packet[2], CRSF_PACKET_SIZE-3); //CRC
+    packet[25] = crsf_crc8(&packet[2], packet[1]-1); //CRC
 
 }
 
@@ -140,6 +128,6 @@ void buildElrsPacket(uint8_t packetCmd[],uint8_t command, uint8_t value)
   packetCmd[4] = ADDR_RADIO;
   packetCmd[5] = command;
   packetCmd[6] = value;
-  packetCmd[7] = crsf_crc8(&packetCmd[2], packetCmd[1]-1);
+  packetCmd[7] = crsf_crc8(&packetCmd[2], packetCmd[1]-1); //CRC
 
 }
