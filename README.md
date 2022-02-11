@@ -2,6 +2,13 @@
 This Transmitter is inspired by cruwaller， you can find the 3D shell file in this repo:
 https://github.com/cruwaller/elrs_handset
 
+
+### Update Log V0.9.2
+Update cmd to elrs 2.0 (power setting commond of 2.0 is different from 1.0)
+support power and pakcet rate settingn
+Re write gimbal calibation method, add center stick offset 
+
+
 ### Update Log V0.9.1
 Add 2 pre settings for power and package rate:
 
@@ -9,7 +16,7 @@ Add 2 pre settings for power and package rate:
 Now you can enter setting 1 and 2 by gesutre:
 
 Setting 1:
-//250Hz 50mW
+//250Hz 25mW
 
 Hold AILERON left and ELEVATOR down at power up.
 
