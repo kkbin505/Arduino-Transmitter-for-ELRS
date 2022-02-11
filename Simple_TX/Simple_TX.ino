@@ -96,14 +96,14 @@ void loop() {
      * Handel analogy input
      */
     //constrain to avoid overflow
-    Aileron_value = constrain(analogRead(analogInPinAileron)+Aileron_OFFSET,0,1023); 
-    Elevator_value= constrain(analogRead(analogInPinElevator)+Elevator_OFFSET,0,1023); 
-    Throttle_value=constrain(analogRead(analogInPinThrottle)+Throttle_OFFSET,0,1023); 
-    Rudder_value = constrain(analogRead(analogInPinRudder)+Rudder_OFFSET,0,1023);  
-    rcChannels[AILERON] = map(Aileron_value,1023,0,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX); 
-    rcChannels[ELEVATOR] = map(Elevator_value,1023,0,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX); 
-    rcChannels[THROTTLE] = map(Throttle_value,905,90,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX);//reverse
-    rcChannels[RUDDER] = map(Rudder_value ,0,1023,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX);
+    Aileron_value = constrain(analogRead(analogInPinAileron)+Aileron_OFFSET,ANALOG_CUTOFF,1023-ANALOG_CUTOFF); 
+    Elevator_value= constrain(analogRead(analogInPinElevator)+Elevator_OFFSET,ANALOG_CUTOFF,1023-ANALOG_CUTOFF); 
+    Throttle_value=constrain(analogRead(analogInPinThrottle)+Throttle_OFFSET,ANALOG_CUTOFF,1023-ANALOG_CUTOFF); 
+    Rudder_value = constrain(analogRead(analogInPinRudder)+Rudder_OFFSET,ANALOG_CUTOFF,1023-ANALOG_CUTOFF);  
+    rcChannels[AILERON] = map(Aileron_value,1023-ANALOG_CUTOFF,ANALOG_CUTOFF,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX); //reverse
+    rcChannels[ELEVATOR] = map(Elevator_value,1023-ANALOG_CUTOFF,ANALOG_CUTOFF,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX); //reverse
+    rcChannels[THROTTLE] = map(Throttle_value,1023-ANALOG_CUTOFF,ANALOG_CUTOFF,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX);//reverse
+    rcChannels[RUDDER] = map(Rudder_value ,ANALOG_CUTOFF,1023-ANALOG_CUTOFF,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX);
 
      /*
      * Handel digital input
@@ -146,7 +146,7 @@ void loop() {
    selectSetting();
     if (currentMicros > crsfTime) {
 
-      if (loopCount<=200){  //repeat 200 packets to build connection to TX module
+      if (loopCount<=500){  //repeat 200 packets to build connection to TX module
         //Build commond packet
         if (currentSetting >0){
           buildElrsPacket(crsfCmdPacket,ELRS_PKT_RATE_COMMAND,currentPktRate);
@@ -154,10 +154,10 @@ void loop() {
         }
         loopCount++;
       }
-      else if (loopCount > 200 && loopCount < 210){ // repeat 10 packets to avoid bad packet
+      else if (loopCount > 500 && loopCount < 510){ // repeat 10 packets to avoid bad packet
         if (currentSetting >0){
           buildElrsPacket(crsfCmdPacket,ELRS_POWER_COMMAND,currentPower);
-          //buildElrsPacket(crsfCmdPacket, 17, 4); //for test only
+          //buildElrsPacket(crsfCmdPacket, 17, 0); //for test only
           Serial.write(crsfCmdPacket, CRSF_CMD_PACKET_SIZE);
         }
         loopCount++;
