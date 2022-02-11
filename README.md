@@ -5,8 +5,8 @@ https://github.com/cruwaller/elrs_handset
 
 ### Update Log V0.9.2
 Update cmd to elrs 2.0 (power setting commond of 2.0 is different from 1.0)
-support power and pakcet rate settingn
-Re write gimbal calibation method, add center stick offset 
+
+Re write gimbal calibation method, add center stick offset in config file
 
 
 ### Update Log V0.9.1
