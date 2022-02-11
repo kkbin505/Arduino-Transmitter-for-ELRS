@@ -27,13 +27,13 @@
 #define RC_CHANNEL_MAX 1811
 */
 
+#define ANALOG_CUTOFF 150  //cut off lower and upper end to avoid un-symmetric joystick range in trade off resolution
+
  // Define RC input Offset
-int Aileron_OFFSET = -8;        // values read from the pot 
+int Aileron_OFFSET = -8;        
 int Elevator_OFFSET  = 18; 
 int Throttle_OFFSET =0;
 int Rudder_OFFSET  = 5; 
-
-uint8_t offsets[3];
 
 //IO setup
 //pins that used for the Joystick
@@ -58,8 +58,8 @@ const int DIGITAL_PIN_BUZZER = 7;  // do not use in pcb v0.9
  const float WARNING_VOLTAGE=7.4; //2S Lipo
 
  // Define Commond for start Up Setting
- #define RC_MIN_COMMAND  480
- #define RC_MAX_COMMAND  1500
+ #define RC_MIN_COMMAND  600
+ #define RC_MAX_COMMAND  1400
 
 // from https://github.com/DeviationTX/deviation/pull/1009/ ELRS menu implement in deviation TX
 /*static uint8_t  currentPktRate =1; //  "250Hz", "150Hz", "50Hz"
