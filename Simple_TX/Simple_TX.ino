@@ -130,7 +130,7 @@ void loop() {
     //Aux 3
     if(AUX3_value==0){
       rcChannels[AUX3] =CRSF_DIGITAL_CHANNEL_MIN;
-    }else if(AUX4_value==1){
+    }else if(AUX3_value==1){
       rcChannels[AUX3] =CRSF_DIGITAL_CHANNEL_MAX;
     }
 
