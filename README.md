@@ -1,7 +1,10 @@
 
-This Transmitter is inspired by cruwaller， you can find the 3D shell file in this repo:
+This Transmitter is inspired by cruwallero:
 https://github.com/cruwaller/elrs_handset
 
+### Upload STL File
+
+![微信图片_20220213205906](https://user-images.githubusercontent.com/43392862/153756463-16c5e99b-b1b6-4f23-9fea-cefb4bb9df04.jpg)
 
 ### Update Log V0.9.2
 Update cmd to elrs 2.0 (power setting commond of 2.0 is different from 1.0)
