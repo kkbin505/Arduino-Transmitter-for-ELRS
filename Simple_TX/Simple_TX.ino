@@ -75,7 +75,12 @@ void setup() {
    batteryVoltage=0.0; 
    
    delay(1000); //Give enough time for uploda firmware
-   Serial.begin(SERIAL_BAUDRATE);
+   
+   #ifdef DEBUG
+    Serial.begin(115200);
+   #else
+    Serial.begin(SERIAL_BAUDRATE);
+   #endif
 
    digitalWrite(DIGITAL_PIN_LED, HIGH); //LED ON
 
@@ -85,7 +90,7 @@ void loop() {
     uint32_t currentMicros = micros();
 
     //Read Voltage
-    batteryVoltage=analogRead(VOLTAGE_READ_PIN)/103.0;
+    batteryVoltage=analogRead(VOLTAGE_READ_PIN)/103.0f;
 
     if (batteryVoltage<WARNING_VOLTAGE){
        slowBlinkLED(DIGITAL_PIN_LED);
