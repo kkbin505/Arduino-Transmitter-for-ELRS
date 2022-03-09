@@ -206,8 +206,6 @@ void loop() {
 }
 
 void selectSetting(){
-
-    currentSetting =0;
     // startup stick commands (protocol selection / renew transmitter ID)
     
     if(rcChannels[AILERON] < RC_MIN_COMMAND && rcChannels[ELEVATOR] < RC_MIN_COMMAND){ // Elevator down + aileron left
@@ -219,5 +217,14 @@ void selectSetting(){
       currentPktRate = SETTING_2_PktRate;
       currentPower = SETTING_2_Power;
       currentSetting =2;
+    }
+
+      else if (rcChannels[AILERON] < RC_MIN_COMMAND  && rcChannels[ELEVATOR] > RC_MAX_COMMAND){ // Elevator up + aileron right
+      currentPktRate = SETTING_3_PktRate;
+      currentPower = SETTING_3_Power;
+      currentSetting =3;
+    }
+    else{
+          currentSetting =0;
     }
 }
