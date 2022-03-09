@@ -61,18 +61,20 @@ const int DIGITAL_PIN_BUZZER = 7;  // do not use in pcb v0.9
  #define RC_MIN_COMMAND  600
  #define RC_MAX_COMMAND  1400
 
-// from https://github.com/DeviationTX/deviation/pull/1009/ ELRS menu implement in deviation TX
-/*static uint8_t  currentPktRate =1; //  "250Hz", "150Hz", "50Hz"
-  //                                       1        3       5      
-static uint8_t  currentPower =1 ;//  "10mW", "25mW", "50mW", "100mW", "250mW"
-  //                                   0     1         2        3        4   
-*/
-//2 Default Settings
-#define SETTING_1_PktRate 3  //250Hz 
+
+
+//[Packet Rate]= 0 - 50Hz / 1 - 150Hz / 3 - 250Hz 
+//[TX Power]=0 - 10mW / 1 - 25mW / 2 - 50mW /3 - 100mW/4 - 250mW
+//3 Default Settings
+
+#define SETTING_1_PktRate 2  //250Hz 
 #define SETTING_1_Power 1    //25mW
 
 #define SETTING_2_PktRate 1  //150Hz
 #define SETTING_2_Power 3    //100mW
+
+#define SETTING_3_PktRate 3  //500Hz
+#define SETTING_3_Power 1    //25mW
 
 enum chan_order{
     AILERON,
