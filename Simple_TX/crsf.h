@@ -19,8 +19,7 @@
  // Basic setup
 #define CRSF_MAX_CHANNEL 16
 #define CRSF_FRAME_SIZE_MAX 64
-//#define SERIAL_BAUDRATE 115200 //low baud for Arduino Nano , the TX module will auto detect baud. max packet rate is 250Hz.
-#define SERIAL_BAUDRATE 400000 //400k baud rate
+
  // Device address & type
 #define RADIO_ADDRESS                  0xEA
 #define ADDR_MODULE                    0xEE  //  Crossfire transmitter
@@ -33,8 +32,10 @@
 
 // internal crsf variables
 #define CRSF_TIME_NEEDED_PER_FRAME_US   1100 // 700 ms + 400 ms for potential ad-hoc request
-//#define CRSF_TIME_BETWEEN_FRAMES_US     4000 // 4 ms 250Hz
-#define CRSF_TIME_BETWEEN_FRAMES_US     1666 // 1.6 ms 500Hz
+//#define SERIAL_BAUDRATE 115200 //low baud for Arduino Nano , the TX module will auto detect baud. 115200/400000
+//#define CRSF_TIME_BETWEEN_FRAMES_US     4000 // 4 ms 250Hz @115200 baud
+#define SERIAL_BAUDRATE 400000 
+#define CRSF_TIME_BETWEEN_FRAMES_US     1666 // 1.6 ms 500Hz @400K baud
 #define CRSF_PAYLOAD_OFFSET offsetof(crsfFrameDef_t, type)
 #define CRSF_MSP_RX_BUF_SIZE 128
 #define CRSF_MSP_TX_BUF_SIZE 128
