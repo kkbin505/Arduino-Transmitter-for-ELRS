@@ -4,7 +4,7 @@
 // Arduino Nano
 // ELRS 2.4G TX moduel
 // Custom PCB from JLCPCB
-// const float codeVersion = 0.92; // Software revision
+// const float codeVersion = 0.93; // Software revision
 // https://github.com/kkbin505/Arduino-Transmitter-for-ELRS
 
  * This file is part of Simple TX
