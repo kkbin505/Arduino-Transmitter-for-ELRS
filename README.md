@@ -6,6 +6,15 @@ https://github.com/cruwaller/elrs_handset
 
 ![微信图片_20220213205906](https://user-images.githubusercontent.com/43392862/153756463-16c5e99b-b1b6-4f23-9fea-cefb4bb9df04.jpg)
 
+### Update Log V0.9.3
+Increase baud rate to 400K
+*** In 400k baud, theoretical maxmum packet rate is 500Hz (400000/320bit per second, 1.6ms per frame). RC data pcket is 32byte=320bit(plus 1 start bit and 1 end bit).
+Now simpleTX is supporting 500Hz
+
+Add 3rd pre seeting for 500Hz 25mW
+Gestrue:
+Hold AILERON left and ELEVATOR up at power up.
+
 ### Update Log V0.9.2
 Update cmd to elrs 2.0 (power setting commond of 2.0 is different from 1.0)
 
@@ -50,7 +59,7 @@ Due to the hardware limitation of the ATMega328p, the follow functions are not s
 
 ** Telemetray is off, 328p do not support half duplex.
 
-*** The 328p only support 115K baud, theoretical maxmum packet rate is 250Hz (115200/320bit per second, 4ms per frame). RC data apcket is 32byte=320bit(plus 1 start bit and 1 end bit).
+
 
 The uart logic voltage of ESP32 is 3.3V, my ATMega328p is 5V. However mine TX work fine, it seems ESP32 UART is 5V tolerance.
 
