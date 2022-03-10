@@ -8,6 +8,7 @@ https://github.com/cruwaller/elrs_handset
 
 ### Update Log V0.9.3
 Increase baud rate to 400K
+
 *** In 400k baud, theoretical maxmum packet rate is 500Hz (400000/320bit per second, 1.6ms per frame). RC data pcket is 32byte=320bit(plus 1 start bit and 1 end bit).
 
 Now simpleTX is supporting 500Hz
