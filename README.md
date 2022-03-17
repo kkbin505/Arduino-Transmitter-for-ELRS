@@ -2,6 +2,10 @@
 This Transmitter is inspired by cruwallero:
 https://github.com/cruwaller/elrs_handset
 
+Add video:
+
+https://www.youtube.com/watch?v=BPLFkZUoV28
+
 ### Upload STL File
 
 ![微信图片_20220213205906](https://user-images.githubusercontent.com/43392862/153756463-16c5e99b-b1b6-4f23-9fea-cefb4bb9df04.jpg)
