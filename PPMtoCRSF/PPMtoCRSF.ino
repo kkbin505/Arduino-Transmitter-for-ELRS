@@ -1,12 +1,11 @@
-/* Decode PPM to CRSF protocol
- *  Even it is meanless because PPM is too slow for CRSF but at least let the old transmitter that do not support CRSF can run CRSF
- */
-/*
-// Simple Arduino trasmisster (PPM to ELRS)
-// Arduino Nano
-// ELRS 2.4G TX moduel
-// Custom PCB from JLCPCB
-// https://github.com/kkbin505/Arduino-Transmitter-for-ELRS
+/* 
+-------------------------------------------------------------------------
+ Simple Arduino trasmisster (PPM to ELRS)
+ Decode PPM to CRSF protocol
+ Arduino Nano
+ ELRS 2.4G TX moduel
+ Custom PCB from JLCPCB
+ https://github.com/kkbin505/Arduino-Transmitter-for-ELRS
  * This file is part of Simple TX
  *
  * Simple TX is free software: you can redistribute it and/or modify
@@ -24,7 +23,6 @@
  */
 
 //Use this lib https://github.com/DzikuVx/PPMReader
-
 #include "PPMReader.h"
 //Setup ppm read on pin 2, 
 
