@@ -10,7 +10,7 @@ https://www.youtube.com/watch?v=BPLFkZUoV28
 ### Update Log 2022/3/20
 
 
-Update PPM to ELRS library, sigianl is more stable, still need more test
+Update PPM to ELRS library, siginal is more stable, still need more test
 
 
 https://github.com/kkbin505/Arduino-Transmitter-for-ELRS/tree/main/PPMtoCRSF
