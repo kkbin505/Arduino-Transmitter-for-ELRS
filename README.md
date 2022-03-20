@@ -6,6 +6,16 @@ Add video:
 
 https://www.youtube.com/watch?v=BPLFkZUoV28
 
+
+### Update Log 2022/3/20
+
+
+Update PPM to ELRS library, sigianl is more stable, still need more test
+
+
+https://github.com/kkbin505/Arduino-Transmitter-for-ELRS/tree/main/PPMtoCRSF
+
+
 ### Upload STL File
 
 ![微信图片_20220213205906](https://user-images.githubusercontent.com/43392862/153756463-16c5e99b-b1b6-4f23-9fea-cefb4bb9df04.jpg)
