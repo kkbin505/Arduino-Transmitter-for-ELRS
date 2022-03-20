@@ -1,59 +1,54 @@
 /* Decode PPM to CRSF protocol
  *  Even it is meanless because PPM is too slow for CRSF but at least let the old transmitter that do not support CRSF can run CRSF
  */
- 
-#include <PPMReader.h>
- // tune ppm input for "special" transmitters
-
 /*
- * CRSF protocol
+// Simple Arduino trasmisster (PPM to ELRS)
+// Arduino Nano
+// ELRS 2.4G TX moduel
+// Custom PCB from JLCPCB
+// https://github.com/kkbin505/Arduino-Transmitter-for-ELRS
+ * This file is part of Simple TX
  *
- * CRSF protocol uses a single wire half duplex uart connection.
- * The master sends one frame every 4ms and the slave replies between two frames from the master.
+ * Simple TX is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * 420000 baud
- * not inverted
- * 8 Bit
- * 1 Stop bit
- * Big endian
- * ELRS uses crossfire protocol at many different baud rates supported by EdgeTX i.e. 115k, 400k, 921k, 1.87M, 3.75M
- * 115000 bit/s = 14400 byte/s 
- * 420000 bit/s = 46667 byte/s (including stop bit) = 21.43us per byte
- * Max frame size is 64 bytes
- * A 64 byte frame plus 1 sync byte can be transmitted in 1393 microseconds.
+ * Simple TX is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * CRSF_TIME_NEEDED_PER_FRAME_US is set conservatively at 1500 microseconds
- *
- * Every frame has the structure:
- * <Device address><Frame length><Type><Payload><CRC>
- *
- * Device address: (uint8_t)
- * Frame length:   length in  bytes including Type (uint8_t)
- * Type:           (uint8_t)
- * CRC:            (uint8_t)
- *
+ * You should have received a copy of the GNU General Public License
+ * along with Cleanflight.  If not, see <http://www.gnu.org/licenses/>.
  */
-//#include "crossfire.h"
-// Device address & type
+
+//Use this lib https://github.com/DzikuVx/PPMReader
+
+#include "PPMReader.h"
+//Setup ppm read on pin 2, 
+
+PPMReader ppmReader(2, 0, false);
+
+byte channelAmount = 8;
+
+//default channel order is  AETR
+#define TAER
+
 #define RADIO_ADDRESS                  0xEA
 #define ADDR_MODULE                    0xEE  //  Crossfire transmitter
 #define TYPE_CHANNELS                  0x16
 
-// Define RC input limite
-#define RC_CHANNEL_MIN 172
-#define RC_CHANNEL_MID 991
-#define RC_CHANNEL_MAX 1811
-
 // internal crsf variables
+#define CRSF_CHANNEL_MIN 172
+#define CRSF_CHANNEL_MID 991
+#define CRSF_CHANNEL_MAX 1811
 #define CRSF_TIME_NEEDED_PER_FRAME_US   1100 // 700 ms + 400 ms for potential ad-hoc request
-//#define CRSF_TIME_BETWEEN_FRAMES_US     6667 // At fastest, frames are sent by the transmitter every 6.667 milliseconds, 150 Hz
 #define CRSF_TIME_BETWEEN_FRAMES_US     4000 // 4 ms 250Hz
-#define CRSF_DIGITAL_CHANNEL_MIN 172
-#define CRSF_DIGITAL_CHANNEL_MAX 1811
 #define CRSF_PAYLOAD_OFFSET offsetof(crsfFrameDef_t, type)
 #define CRSF_MAX_CHANNEL 16
 #define CRSF_FRAME_SIZE_MAX 64
-#define SERIAL_BAUDRATE 115200
+#define SERIAL_BAUDRATE 400000
 #define CRSF_MSP_RX_BUF_SIZE 128
 #define CRSF_MSP_TX_BUF_SIZE 128
 #define CRSF_PAYLOAD_SIZE_MAX   60
@@ -61,7 +56,91 @@
 #define CRSF_PACKET_SIZE  26
 #define CRSF_FRAME_LENGTH 24;   // length of type + payload + crc
 
+uint8_t crsfPacket[CRSF_PACKET_SIZE];
+int rcChannels[CRSF_MAX_CHANNEL];
+uint32_t crsfTime = 0;
 
+#ifdef TAER
+enum chan_order{
+    THROTTLE, 
+    AILERON,
+    ELEVATOR,
+    RUDDER,
+    AUX1,  // (CH5)  ARM switch for Expresslrs
+    AUX2,  // (CH6)  angel / airmode change
+    AUX3,  // (CH7)  flip after crash
+    AUX4,  // (CH8) 
+    AUX5,  // (CH9) 
+    AUX6,  // (CH10) 
+    AUX7,  // (CH11)
+    AUX8,  // (CH12)
+};
+#else
+enum chan_order{
+    AILERON,
+    ELEVATOR,
+    THROTTLE, 
+    RUDDER,
+    AUX1,  // (CH5)  ARM switch for Expresslrs
+    AUX2,  // (CH6)  angel / airmode change
+    AUX3,  // (CH7)  flip after crash
+    AUX4,  // (CH8) 
+    AUX5,  // (CH9) 
+    AUX6,  // (CH10) 
+    AUX7,  // (CH11)
+    AUX8,  // (CH12)
+};
+#endif
+
+void setup()
+{
+  /*
+  TCCR1A = 0;  //reset timer1
+  TCCR1B = 0;
+  TCCR1B |= (1 << CS11);  //set timer1 to increment every 0,5 us or 1us on 8MHz
+  */
+  for (uint8_t i = 0; i < CRSF_MAX_CHANNEL; i++) {
+        rcChannels[i] = CRSF_CHANNEL_MID;
+    }
+    rcChannels[THROTTLE] = CRSF_CHANNEL_MIN; // Throttle
+ 
+    delay(1000);
+    Serial.begin(SERIAL_BAUDRATE);
+  
+    //Serial.begin(115200);
+    //Serial.println("ready");
+}
+
+void loop()
+{
+  uint32_t currentMicros = micros();
+
+ if(ppmReader.isReceiving()==true){
+  int count;
+  while(ppmReader.get(count) != 0){  //print out the servo values
+     int value = ppmReader.get(count);;
+     rcChannels[count]=map(value,1000,2000,CRSF_CHANNEL_MIN,CRSF_CHANNEL_MAX);
+    //Serial.print(ppmReader.get(count));
+    //Serial.print("  ");
+    count++;
+  }
+ }
+  //set fail safe value
+else{
+    rcChannels[THROTTLE] = CRSF_CHANNEL_MIN; // 
+    rcChannels[AILERON] = CRSF_CHANNEL_MID; // 
+    rcChannels[ELEVATOR] = CRSF_CHANNEL_MID; // 
+    rcChannels[RUDDER] = CRSF_CHANNEL_MID; // 
+    rcChannels[AUX1] = CRSF_CHANNEL_MIN; // ARM Low
+  }
+  
+    if (currentMicros > crsfTime) {
+        crsfPreparePacket(crsfPacket, rcChannels);
+        Serial.write(crsfPacket, CRSF_PACKET_SIZE);            
+        crsfTime = currentMicros + CRSF_TIME_BETWEEN_FRAMES_US;
+    }
+
+}
 
 // crc implementation from CRSF protocol document rev7
 static u8 crsf_crc8tab[256] = {
@@ -142,66 +221,4 @@ void crsfPreparePacket(uint8_t packet[], int channels[]){
     packet[25] = crsf_crc8(&packet[2], CRSF_PACKET_SIZE-3); //CRC
 
 
-}
-
-// Initialize a PPMReader on digital pin 2 with 6 expected channels.
-byte interruptPin = 2;
-byte channelAmount = 16;
-PPMReader ppm(interruptPin, channelAmount);
-bool ppmReceived = false;
-
-uint8_t crsfPacket[CRSF_PACKET_SIZE];
-int rcChannels[CRSF_MAX_CHANNEL];
-uint32_t crsfTime = 0;
-uint8_t crsfPacket1[26] = {0x0F, 0x00, 0x34, 0x1F, 0xA8, 0x09, 0x08, 0x6A, 0x50, 0x03,0x10, 0x80, 0x00,
-                             0x04, 0x20, 0x00, 0x01, 0x08, 0x07, 0x38, 0x00, 0x10, 0x80, 0x00, 0x04,0x00};
-uint8_t crsfPacket2[26] = {0x6E, 0x77, 0x90, 0x0C, 0xA5, 0x8B, 0x14, 0x9D, 0x27, 0x1D,0x3B, 0x90, 0x81,
-                             0x1F, 0xC4, 0x03, 0x3F, 0x7F, 0xF0, 0xA0, 0x14, 0x23, 0x80, 0x00, 0x04,0x00};
-
-void setup() {
-    for (uint8_t i = 0; i < CRSF_MAX_CHANNEL; i++) {
-        rcChannels[i] = RC_CHANNEL_MID;
-    }
-    rcChannels[2] = RC_CHANNEL_MIN; // Throttle
-    rcChannels[3] = RC_CHANNEL_MID; // Thrust
-
-    delay(1000);
-    Serial.begin(SERIAL_BAUDRATE);
-   // Serial.write(crsfPacket1, CRSF_PACKET_SIZE);
-}
-
-void loop() {
-    uint32_t currentMicros = micros();
-    /*
-     * Here you can modify values of rcChannels while keeping it in 1000:2000 range
-     */
-    //Aileron_value = analogRead(analogInPinX); 
-    //Elevator_value= analogRead(analogInPinY); 
-    //rcChannels[0] = map(Aileron_value,0,677,RC_CHANNEL_MIN,RC_CHANNEL_MAX);
-    //rcChannels[1] = map(Elevator_value,0,677,RC_CHANNEL_MIN,RC_CHANNEL_MAX);
-    //rcChannels[0] = 600;
-    //rcChannels[1] = 600;
-     for (byte channel = 1; channel <= channelAmount; ++channel) {
-        int value = ppm.latestValidChannelValue(channel, 0);
-        rcChannels[channel-1]=map(value,1000,2000,RC_CHANNEL_MIN,RC_CHANNEL_MAX);
-    }
-//  transmit_enable=!digitalRead(transmit_pin);
-    //ppmReceived = ppm.isReceiving();
-    if (currentMicros > crsfTime) {
-        crsfPreparePacket(crsfPacket, rcChannels);
-        Serial.write(crsfPacket, CRSF_PACKET_SIZE);
-/*
-       Serial.print("RC channel  ");  
-       Serial.print(rcChannels[0]); 
-       Serial.print(" i"); 
-       Serial.print(rcChannels[1]); 
-       Serial.print(" i"); 
-       Serial.print(rcChannels[2]); 
-       Serial.print(" i"); 
-       Serial.print(rcChannels[3]); 
-       Serial.println(); 
-*/
-        crsfTime = currentMicros + CRSF_TIME_BETWEEN_FRAMES_US;
-    }
-       //delay(200);
 }
