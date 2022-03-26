@@ -7,7 +7,20 @@ Add video:
 https://www.youtube.com/watch?v=BPLFkZUoV28
 
 
+### Update Log 2022/3/26
+
+Update STL File：
+
+Solve gimbal & switch interference
+
+Add battery tray
+
+![ASSEMBLE](https://user-images.githubusercontent.com/43392862/160218062-a254729a-f0f7-474e-8428-6ba044f421b5.jpg)
+
+
+
 ### Update Log 2022/3/20
+
 
 
 Update PPM to ELRS library, siginal is more stable, still need more test
