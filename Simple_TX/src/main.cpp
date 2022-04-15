@@ -31,6 +31,8 @@
 
 #include <Arduino.h>
 
+#include "EEPROM.h"
+
 #include "config.h"
 #include "crsf.h"
 #include "led.h"
@@ -55,10 +57,168 @@ int currentSetting = 0;
 
 uint8_t crsfPacket[CRSF_PACKET_SIZE];
 uint8_t crsfCmdPacket[CRSF_CMD_PACKET_SIZE];
-int rcChannels[CRSF_MAX_CHANNEL];
+int16_t rcChannels[CRSF_MAX_CHANNEL];
 uint32_t crsfTime = 0;
 
 CRSF crsfClass;
+
+// -----------------------------------------------------------------------------------------------------
+// Calibration
+
+#define CALIB_MARK      0x55
+#define CALIB_MARK_ADDR 0x00
+#define CALIB_VAL_ADDR  CALIB_MARK_ADDR + 1
+
+#define CALIB_CNT       5       // times of switch on/off
+#define CALIB_TMO       5000    // ms
+
+struct CalibValues {
+    int aileronMin;
+    int aileronMax;
+    int elevatorMin;
+    int elevatorMax;
+    int thrMin;
+    int thrMax;
+    int rudderMin;
+    int rudderMax;
+};
+
+CalibValues calValues;
+
+bool calibrationPresent() {
+    return EEPROM.read(CALIB_MARK_ADDR) == CALIB_MARK;
+}
+
+void calibrationSave() {
+    EEPROM.update(CALIB_MARK_ADDR, CALIB_MARK);
+    EEPROM.put(CALIB_VAL_ADDR, calValues);
+}
+
+void calibrationLoad() {
+    EEPROM.get(CALIB_VAL_ADDR, calValues);
+}
+
+void calibrationReset() {
+    EEPROM.put(CALIB_MARK_ADDR, (uint8_t)0xFF);
+    calValues = {
+        .aileronMin = 0,
+        .aileronMax = 1023,
+        .elevatorMin = 0,
+        .elevatorMax = 1023,
+        .thrMin = 0,
+        .thrMax = 1023,
+        .rudderMin = 0,
+        .rudderMax = 1023,
+    };
+    EEPROM.put(CALIB_VAL_ADDR, calValues);
+}
+
+uint8_t aux1cnt = 0;
+uint8_t aux2cnt = 0;
+
+unsigned long calibrationTimerStart;
+
+void calibrationChirp(uint8_t times) {
+    for (uint8_t i = 0; i < times; i++) {
+        digitalWrite(DIGITAL_PIN_BUZZER, HIGH);
+        digitalWrite(DIGITAL_PIN_LED, HIGH);
+        delay(200);
+        digitalWrite(DIGITAL_PIN_BUZZER, LOW);
+        digitalWrite(DIGITAL_PIN_LED, LOW);
+        delay(200);
+    }
+}
+
+void calibrationCount(int aux1, int aux2) {
+    static uint8_t preAux1 = 0;
+    static uint8_t preAux2 = 0;
+
+    // Start timer window
+    if (aux1cnt == 0 && aux2cnt == 0) {
+        calibrationTimerStart = millis();
+    }
+
+    // Timeout
+    if (calibrationTimerStart + CALIB_TMO > millis()) {
+        aux1cnt = 0;
+        aux2cnt = 0;
+        preAux1 = 0;
+        preAux2 = 0;
+        return;
+    }
+
+    // Analyze switches, count only one side of the switch
+    if (aux1 == 1 && preAux1 == 0) {
+        aux1cnt++;
+        preAux1 = 1;
+    } else if (aux1 == 0 && preAux1 == 1) {
+        preAux1 = 0;
+    }
+
+    if (aux2 == 1 && preAux2 == 0) {
+        aux2cnt++;
+        preAux2 = 1;
+    } else if (aux2 == 0 && preAux2 == 1) {
+        preAux2 = 0;
+    }
+}
+
+bool calibrationRequested() {
+    return aux1cnt > CALIB_CNT && aux2cnt > CALIB_CNT;
+}
+
+bool calibrationProcess() {
+    aux1cnt = 0;
+    aux2cnt = 0;
+
+    calibrationChirp(5);
+
+    calibrationTimerStart = millis();
+
+    // 15 seconds for moving sticks
+    while ((calibrationTimerStart + (CALIB_TMO * 3)) < millis()) {
+        // A Min-Max
+        int val = analogRead(analogInPinAileron);
+        if (val < calValues.aileronMin) {
+            calValues.aileronMin = val;
+        } else if (val > calValues.aileronMax) {
+            calValues.aileronMax = val;
+        }
+
+        // E Min-Max
+        val = analogRead(analogInPinElevator);
+        if (val < calValues.elevatorMin) {
+            calValues.elevatorMin = val;
+        } else if (val > calValues.elevatorMax) {
+            calValues.elevatorMax = val;
+        }
+
+        // T Min-Max
+        val = analogRead(analogInPinThrottle);
+        if (val < calValues.thrMin) {
+            calValues.thrMin = val;
+        } else if (val > calValues.thrMax) {
+            calValues.thrMax = val;
+        }
+
+        // R Min-Max
+        val = analogRead(analogInPinRudder);
+        if (val < calValues.rudderMin) {
+            calValues.rudderMin = val;
+        } else if (val > calValues.rudderMax) {
+            calValues.rudderMax = val;
+        }
+
+        // Double beep and blink every 500ms
+        if (millis() % 500 == 0) {
+            calibrationChirp(2);
+        }
+    }
+
+    return true;
+}
+
+// -----------------------------------------------------------------------------------------------------
 
 void selectSetting() {
     // startup stick commands (protocol selection / renew transmitter ID)
@@ -80,7 +240,8 @@ void selectSetting() {
     }
 }
 
-void setup() {
+void setup()
+{
     // inialize rc data
     for (uint8_t i = 0; i < CRSF_MAX_CHANNEL; i++) {
         rcChannels[i] = CRSF_DIGITAL_CHANNEL_MIN;
@@ -116,9 +277,29 @@ void setup() {
     crsfClass.begin();
 #endif
     digitalWrite(DIGITAL_PIN_LED, HIGH); // LED ON
+
+    if (calibrationPresent()) {
+        calibrationLoad();
+    } else {
+        calibrationReset();
+    }
 }
 
-void loop() {
+void loop()
+{
+    if (calibrationRequested()) {
+        calibrationReset();
+        if (calibrationProcess()) {
+            calibrationSave();
+            calibrationChirp(3);    // ok
+        } else {
+            calibrationReset();
+            calibrationChirp(10);   // error
+        }
+    } else {
+        calibrationCount(Arm, AUX2_value);
+    }
+
     uint32_t currentMicros = micros();
 
     // Read Voltage
