@@ -15,46 +15,15 @@
  * along with Cleanflight.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// LED blink function:
-
-// Variables will change:
-int ledState = LOW;
+uint8_t ledState = LOW;
 unsigned long previousMillis = 0;
 
-void slowBlinkLED(int ledPin) {
+void slowBlinkLED(int ledPin, uint16_t blinkRate) {
     unsigned long currentMillis = millis();
 
-    if (currentMillis - previousMillis >= 1000) {
-        // save the last time you blinked the LED
-        previousMillis = currentMillis;
-
-        // if the LED is off turn it on and vice-versa:
-        if (ledState == LOW) {
-            ledState = HIGH;
-        } else {
-            ledState = LOW;
-        }
-
-        // set the LED with the ledState of the variable:
-        digitalWrite(ledPin, ledState);
-    }
-}
-
-void fastBlinkLED(int ledPin) {
-    uint32_t currentMillis = millis();
-
-    if (currentMillis - previousMillis >= 300) {
-        // save the last time you blinked the LED
-        previousMillis = currentMillis;
-
-        // if the LED is off turn it on and vice-versa:
-        if (ledState == LOW) {
-            ledState = HIGH;
-        } else {
-            ledState = LOW;
-        }
-
-        // set the LED with the ledState of the variable:
+    if (currentMillis - previousMillis >= blinkRate) {
+        previousMillis = currentMillis;     // save the last time you blinked the LED
+        ledState ^= 1;                      // if the LED is off turn it on and vice-versa
         digitalWrite(ledPin, ledState);
     }
 }

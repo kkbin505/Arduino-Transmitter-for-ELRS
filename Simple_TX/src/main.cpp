@@ -102,7 +102,6 @@ void setup() {
     cli();
     TCCR1A = 0; // set entire TCCR1 register to 0
     TCCR1B = 0;
-
     OCR1A = 100;             // compare match register, change this
     TCCR1B |= (1 << WGM12);  // turn on CTC mode
     TCCR1B |= (1 << CS11);   // 8 prescaler: 0,5 microseconds at 16mhz
@@ -126,8 +125,8 @@ void loop() {
     batteryVoltage = analogRead(VOLTAGE_READ_PIN) / 103.0f; // 98.5
 
     if (batteryVoltage < WARNING_VOLTAGE) {
-        slowBlinkLED(DIGITAL_PIN_LED);
-        // fastBlinkLED(DIGITAL_PIN_LED);
+        slowBlinkLED(DIGITAL_PIN_LED, 1000);
+        // fastBlinkLED(DIGITAL_PIN_LED, 300);
     }
 
     /*
