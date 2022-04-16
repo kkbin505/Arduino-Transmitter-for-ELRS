@@ -15,6 +15,8 @@
  * along with Cleanflight.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+//#define USE_M7
+
 /*
  =======================================================================================================
  Simple TX CONFIG OPTIONS (comment out unneeded options)
@@ -30,17 +32,19 @@
 #define ANALOG_CUTOFF 150 // cut off lower and upper end to avoid un-symmetric joystick range in trade off resolution
 
 // Define RC input Offset
-/* M7
-int Aileron_OFFSET = -46;
-int Elevator_OFFSET  = 57;
-int Throttle_OFFSET =0;
-int Rudder_OFFSET  = -18;
-*/
-/* stat war*/
-int Aileron_OFFSET = -8;
-int Elevator_OFFSET = 8;
-int Throttle_OFFSET = 0;
-int Rudder_OFFSET = 5;
+#ifdef USE_M7
+// M7
+int Aileron_OFFSET    = -46;
+int Elevator_OFFSET   = 57;
+int Throttle_OFFSET   = 0;
+int Rudder_OFFSET     = -18;
+#else
+// stat war
+int Aileron_OFFSET    = -8;
+int Elevator_OFFSET   = 8;
+int Throttle_OFFSET   = 0;
+int Rudder_OFFSET     = 5;
+#endif
 
 // IO setup
 // pins that used for the Joystick

@@ -22,13 +22,6 @@
  * along with Cleanflight.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- =======================================================================================================
- BUILD OPTIONS (comment out unneeded options)
- =======================================================================================================
- */
-//#define DEBUG // if not commented out, Serial.print() is active! For debugging only!!
-
 #include <Arduino.h>
 
 #include "EEPROM.h"
@@ -101,19 +94,18 @@ void calibrationLoad() {
 void calibrationReset() {
     EEPROM.put(CALIB_MARK_ADDR, (uint8_t)0xFF);
     calValues = {
-        .aileronMin = 0,
-        .aileronMax = 1023,
-        .elevatorMin = 0,
-        .elevatorMax = 1023,
-        .thrMin = 0,
-        .thrMax = 1023,
-        .rudderMin = 0,
-        .rudderMax = 1023,
+        .aileronMin     = ANALOG_CUTOFF,
+        .aileronMax     = 1023 - ANALOG_CUTOFF,
+        .elevatorMin    = ANALOG_CUTOFF,
+        .elevatorMax    = 1023 - ANALOG_CUTOFF,
+        .thrMin         = ANALOG_CUTOFF,
+        .thrMax         = 1023 - ANALOG_CUTOFF,
+        .rudderMin      = ANALOG_CUTOFF,
+        .rudderMax      = 1023 - ANALOG_CUTOFF,
     };
     EEPROM.put(CALIB_VAL_ADDR, calValues);
 }
 
-uint8_t aux1cnt = 0;
 uint8_t aux2cnt = 0;
 
 unsigned long calibrationTimerStart;
@@ -130,31 +122,28 @@ void calibrationChirp(uint8_t times) {
 }
 
 void calibrationCount(int aux1, int aux2) {
-    static uint8_t preAux1 = 0;
     static uint8_t preAux2 = 0;
 
-    // Start timer window
-    if (aux1cnt == 0 && aux2cnt == 0) {
+    // Don't do anything if ARMED
+    if (aux1 != 0) {
+        aux2cnt = 0;
+        preAux2 = 0;
+        return;
+    }
+
+    // Start timer window // Arm = DISARMED
+    if (aux2cnt == 0) {
         calibrationTimerStart = millis();
     }
 
     // Timeout
     if (calibrationTimerStart + CALIB_TMO > millis()) {
-        aux1cnt = 0;
         aux2cnt = 0;
-        preAux1 = 0;
         preAux2 = 0;
         return;
     }
 
-    // Analyze switches, count only one side of the switch
-    if (aux1 == 1 && preAux1 == 0) {
-        aux1cnt++;
-        preAux1 = 1;
-    } else if (aux1 == 0 && preAux1 == 1) {
-        preAux1 = 0;
-    }
-
+    // Analyze AUX2 switch, count only one side of the switch
     if (aux2 == 1 && preAux2 == 0) {
         aux2cnt++;
         preAux2 = 1;
@@ -164,14 +153,24 @@ void calibrationCount(int aux1, int aux2) {
 }
 
 bool calibrationRequested() {
-    return aux1cnt > CALIB_CNT && aux2cnt > CALIB_CNT;
+    return aux2cnt > CALIB_CNT;
 }
 
 bool calibrationProcess() {
-    aux1cnt = 0;
     aux2cnt = 0;
 
-    calibrationChirp(5);
+    calibrationChirp(5);    // start calibration
+
+    // Reset variables to "centers"
+    const int centerValue = (1023 - ANALOG_CUTOFF - ANALOG_CUTOFF) / 2;
+    calValues.aileronMin    = centerValue;
+    calValues.aileronMax    = centerValue;
+    calValues.elevatorMin   = centerValue;
+    calValues.elevatorMax   = centerValue;
+    calValues.thrMin        = centerValue;
+    calValues.thrMax        = centerValue;
+    calValues.rudderMin     = centerValue;
+    calValues.rudderMax     = centerValue;
 
     calibrationTimerStart = millis();
 
@@ -216,6 +215,21 @@ bool calibrationProcess() {
     }
 
     return true;
+}
+
+void calibrationRun(int aux1, int aux2) {
+    if (calibrationRequested()) {
+        calibrationReset();
+        if (calibrationProcess()) {
+            calibrationSave();
+            calibrationChirp(3);    // ok
+        } else {
+            calibrationReset();
+            calibrationChirp(10);   // error
+        }
+    } else {
+        calibrationCount(aux1, aux2);
+    }
 }
 
 // -----------------------------------------------------------------------------------------------------
@@ -271,11 +285,9 @@ void setup()
 #endif
 
     delay(1000); // Give enough time for uploda firmware 1 second
-#ifdef DEBUG
-    Serial.begin(115200);
-#else
+
     crsfClass.begin();
-#endif
+
     digitalWrite(DIGITAL_PIN_LED, HIGH); // LED ON
 
     if (calibrationPresent()) {
@@ -287,18 +299,7 @@ void setup()
 
 void loop()
 {
-    if (calibrationRequested()) {
-        calibrationReset();
-        if (calibrationProcess()) {
-            calibrationSave();
-            calibrationChirp(3);    // ok
-        } else {
-            calibrationReset();
-            calibrationChirp(10);   // error
-        }
-    } else {
-        calibrationCount(Arm, AUX2_value);
-    }
+    calibrationRun(Arm, AUX2_value);
 
     uint32_t currentMicros = micros();
 
@@ -311,73 +312,35 @@ void loop()
     }
 
     /*
-     * Handel analogy input
+     * Handle analogy input
      */
     // constrain to avoid overflow
-    /*  M7
-    Aileron_value = constrain(analogRead(analogInPinAileron)+Aileron_OFFSET,ANALOG_CUTOFF,1023-ANALOG_CUTOFF);
-    Elevator_value= constrain(analogRead(analogInPinElevator)+Elevator_OFFSET,ANALOG_CUTOFF,1023-ANALOG_CUTOFF);
-    Throttle_value=constrain(analogRead(analogInPinThrottle)+Throttle_OFFSET,ANALOG_CUTOFF,1023-ANALOG_CUTOFF);
-    Rudder_value = constrain(analogRead(analogInPinRudder)+Rudder_OFFSET,ANALOG_CUTOFF,1023-ANALOG_CUTOFF);
-    rcChannels[AILERON] = map(Aileron_value,1023-ANALOG_CUTOFF,ANALOG_CUTOFF,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX); //reverse
-    rcChannels[ELEVATOR] = map(Elevator_value,ANALOG_CUTOFF,1023-ANALOG_CUTOFF,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX); //reverse
-    rcChannels[THROTTLE] = map(Throttle_value,1023-ANALOG_CUTOFF,ANALOG_CUTOFF,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX);//reverse
-    rcChannels[RUDDER] = map(Rudder_value ,ANALOG_CUTOFF,1023-ANALOG_CUTOFF,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX);
-    */
-
-    /* Star  war */
     Aileron_value = constrain(analogRead(analogInPinAileron) + Aileron_OFFSET, ANALOG_CUTOFF, 1023 - ANALOG_CUTOFF);
     Elevator_value = constrain(analogRead(analogInPinElevator) + Elevator_OFFSET, ANALOG_CUTOFF, 1023 - ANALOG_CUTOFF);
     Throttle_value = constrain(analogRead(analogInPinThrottle) + Throttle_OFFSET, ANALOG_CUTOFF, 1023 - ANALOG_CUTOFF);
     Rudder_value = constrain(analogRead(analogInPinRudder) + Rudder_OFFSET, ANALOG_CUTOFF, 1023 - ANALOG_CUTOFF);
-    rcChannels[AILERON] = map(Aileron_value, 1023 - ANALOG_CUTOFF, ANALOG_CUTOFF, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);   // reverse
-    rcChannels[ELEVATOR] = map(Elevator_value, 1023 - ANALOG_CUTOFF, ANALOG_CUTOFF, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX); // reverse
-    rcChannels[THROTTLE] = map(Throttle_value, 1023 - ANALOG_CUTOFF, ANALOG_CUTOFF, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX); // reverse
-    rcChannels[RUDDER] = map(Rudder_value, ANALOG_CUTOFF, 1023 - ANALOG_CUTOFF, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);
+    // rcChannels[AILERON] = map(Aileron_value, 1023 - ANALOG_CUTOFF, ANALOG_CUTOFF, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);   // reverse
+    // rcChannels[ELEVATOR] = map(Elevator_value, 1023 - ANALOG_CUTOFF, ANALOG_CUTOFF, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX); // reverse
+    // rcChannels[THROTTLE] = map(Throttle_value, 1023 - ANALOG_CUTOFF, ANALOG_CUTOFF, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX); // reverse
+    // rcChannels[RUDDER] = map(Rudder_value, ANALOG_CUTOFF, 1023 - ANALOG_CUTOFF, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);
+    rcChannels[AILERON]     = map(Aileron_value,    calValues.aileronMax,   calValues.aileronMin,   CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX); // reverse
+    rcChannels[ELEVATOR]    = map(Elevator_value,   calValues.elevatorMax,  calValues.elevatorMin,  CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX); // reverse
+    rcChannels[THROTTLE]    = map(Throttle_value,   calValues.thrMax,       calValues.thrMin,       CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX); // reverse
+    rcChannels[RUDDER]      = map(Rudder_value,     calValues.rudderMin,    calValues.rudderMax,    CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);
 
     /*
      * Handel digital input
      */
     Arm = digitalRead(DIGITAL_PIN_SWITCH_ARM);
     AUX2_value = digitalRead(DIGITAL_PIN_SWITCH_AUX2);
-    //    AUX3_value = digitalRead(DIGITAL_PIN_SWITCH_AUX3);
+    // AUX3_value = digitalRead(DIGITAL_PIN_SWITCH_AUX3);
     // AUX4_value = digitalRead(DIGITAL_PIN_SWITCH_AUX4);// reuse for LED
 
-    // Aux 1 Arm Channel
-    if (Arm == 0)
-    {
-        rcChannels[AUX1] = CRSF_DIGITAL_CHANNEL_MIN;
-    }
-    else
-    {
-        rcChannels[AUX1] = CRSF_DIGITAL_CHANNEL_MAX;
-    }
-
-    // Aux 2 Channel
-    if (AUX2_value == 0)
-    {
-        rcChannels[AUX2] = CRSF_DIGITAL_CHANNEL_MIN;
-    }
-    else
-    {
-        rcChannels[AUX2] = CRSF_DIGITAL_CHANNEL_MAX;
-    }
-
-/*  Aux 3
-    if(AUX3_value==0){
-      rcChannels[AUX3] =CRSF_DIGITAL_CHANNEL_MIN;
-    }else{
-      rcChannels[AUX3] =CRSF_DIGITAL_CHANNEL_MAX;
-    }
-*/
-    //Additional switch add here.
-/*
-    if(AUX4_value==0){
-      rcChannels[AUX4] =CRSF_DIGITAL_CHANNEL_MIN;
-    }else if(AUX4_value==1){
-      rcChannels[AUX4] =CRSF_DIGITAL_CHANNEL_MAX;
-    }
-*/
+    // Aux Channels
+    rcChannels[AUX1] = (Arm == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+    rcChannels[AUX2] = (AUX2_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+    // rcChannels[AUX3] = (AUX3_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+    // rcChannels[AUX4] = (AUX4_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
 
     selectSetting();
 
@@ -406,39 +369,7 @@ void loop()
             loopCount++;
         } else {
             crsfClass.crsfPrepareDataPacket(crsfPacket, rcChannels);
-// For gimal calibation only
-#ifdef DEBUG
-            Serial.print("A_");
-            Serial.print(Aileron_value);
-            Serial.print("_");
-            Serial.print(rcChannels[0]);
-            Serial.print(";E_");
-            Serial.print(Elevator_value);
-            Serial.print("_");
-            Serial.print(rcChannels[1]);
-            Serial.print(";T_");
-            Serial.print(Throttle_value);
-            Serial.print("_");
-            Serial.print(rcChannels[2]);
-            Serial.print("_R_");
-            Serial.print(Rudder_value);
-            Serial.print("_");
-            Serial.print(rcChannels[3]);
-            Serial.print(";Arm_");
-            Serial.print(Arm);
-            Serial.print(";AUX2_");
-            Serial.print(AUX2_value);
-            Serial.print(";AUX3_");
-            Serial.print(AUX3_value);
-            Serial.print("_BatteryVoltage:");
-            Serial.print(batteryVoltage);
-            Serial.print("_CurrentSetting:");
-            Serial.print(currentSetting);
-            Serial.println();
-            delay(500);
-#else
             crsfClass.CrsfWritePacket(crsfPacket, CRSF_PACKET_SIZE);
-#endif
         }
         crsfTime = currentMicros + CRSF_TIME_BETWEEN_FRAMES_US;
     }
