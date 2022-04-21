@@ -18,7 +18,7 @@
 uint8_t ledState = LOW;
 unsigned long previousMillis = 0;
 
-void slowBlinkLED(int ledPin, uint16_t blinkRate) {
+void blinkLED(int ledPin, uint16_t blinkRate) {
     unsigned long currentMillis = millis();
 
     if (currentMillis - previousMillis >= blinkRate) {
