@@ -307,7 +307,7 @@ void loop()
     batteryVoltage = analogRead(VOLTAGE_READ_PIN) / 103.0f; // 98.5
 
     if (batteryVoltage < WARNING_VOLTAGE) {
-        slowBlinkLED(DIGITAL_PIN_LED, 1000);
+        blinkLED(DIGITAL_PIN_LED, 1000);
         // fastBlinkLED(DIGITAL_PIN_LED, 300);
     }
 
