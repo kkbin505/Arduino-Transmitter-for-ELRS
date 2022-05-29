@@ -6,6 +6,17 @@ Add video:
 
 https://www.youtube.com/watch?v=BPLFkZUoV28
 
+### 2022/5/29 Calibration added
+
+Calibration function added by erstec in Platformio_test_branch.
+
+1. enter debug mode by uncomment #define DEBUG
+2. flash firmware to arduino nano
+3. open serial monitor at 115200 baud, and move stick full range within 20 seconds untill you see "Calibration Done"
+4. comment //#define DEBUG and flash firmware to arduino nano
+5. test in bf configurator
+6. done
+
 ### 2022/4/6 Test branch
 
 platformio
