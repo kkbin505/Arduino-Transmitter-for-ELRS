@@ -8,7 +8,7 @@ https://www.youtube.com/watch?v=BPLFkZUoV28
 
 ### 2022/5/29 Calibration added
 
-Calibration function added by erstec in Platformio_test_branch.
+Calibration function added by erstec in Platformio_test_branch, thanks
 
 1. enter debug mode by uncomment #define DEBUG
 2. flash firmware to arduino nano
