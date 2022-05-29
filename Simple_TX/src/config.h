@@ -40,10 +40,10 @@ int Throttle_OFFSET   = 0;
 int Rudder_OFFSET     = -18;
 #else
 // stat war
-int Aileron_OFFSET    = -8;
-int Elevator_OFFSET   = 8;
+int Aileron_OFFSET    = 0;
+int Elevator_OFFSET   = 0;
 int Throttle_OFFSET   = 0;
-int Rudder_OFFSET     = 5;
+int Rudder_OFFSET     = 0;
 #endif
 
 // IO setup
@@ -57,7 +57,7 @@ const int VOLTAGE_READ_PIN = A0;
 // pins that used for the switch
 const int DIGITAL_PIN_SWITCH_ARM = 4;  // Arm switch
 const int DIGITAL_PIN_SWITCH_AUX2 = 3; //
-// const int DIGITAL_PIN_SWITCH_AUX3 = 2;  //
+const int DIGITAL_PIN_SWITCH_AUX3 = 2;  //
 // const int DIGITAL_PIN_SWITCH_AUX4 = 5;  //
 
 // pins that used for output
@@ -110,7 +110,7 @@ enum chan_order
     AUX8, // (CH12)
 };
 
-#define PPMOUTPUT
+//#define PPMOUTPUT
 //-------------------- PPM Config-------------------------
 #define CHANNEL_NUMBER 12          // set the number of chanels
 #define CHANNEL_DEFAULT_VALUE 1500 // set the default servo value
