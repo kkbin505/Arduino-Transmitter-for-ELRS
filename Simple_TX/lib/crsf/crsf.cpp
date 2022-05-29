@@ -27,7 +27,7 @@
  * 1 Stop bit
  * Big endian
  * ELRS uses crossfire protocol at many different baud rates supported by EdgeTX i.e. 115k, 400k, 921k, 1.87M, 3.75M
- * 115000 bit/s = 14400 byte/s 
+ * 115000 bit/s = 14400 byte/s
  * 420000 bit/s = 46667 byte/s (including stop bit) = 21.43us per byte
  * Max frame size is 64 bytes
  * A 64 byte frame plus 1 sync byte can be transmitted in 1393 microseconds.
@@ -43,12 +43,10 @@
  * CRC:            (uint8_t)
  *
  */
+
 #include "crsf.h"
 
-
-
-
- // crc implementation from CRSF protocol document rev7
+// crc implementation from CRSF protocol document rev7
 static uint8_t crsf_crc8tab[256] = {
     0x00, 0xD5, 0x7F, 0xAA, 0xFE, 0x2B, 0x81, 0x54, 0x29, 0xFC, 0x56, 0x83, 0xD7, 0x02, 0xA8, 0x7D,
     0x52, 0x87, 0x2D, 0xF8, 0xAC, 0x79, 0xD3, 0x06, 0x7B, 0xAE, 0x04, 0xD1, 0x85, 0x50, 0xFA, 0x2F,
@@ -69,73 +67,68 @@ static uint8_t crsf_crc8tab[256] = {
 
 uint8_t crsf_crc8(const uint8_t *ptr, uint8_t len) {
     uint8_t crc = 0;
-    for (uint8_t i=0; i < len; i++) {
+    for (uint8_t i = 0; i < len; i++){
         crc = crsf_crc8tab[crc ^ *ptr++];
     }
     return crc;
 }
 
-//Serial begin
-void CRSF::begin(){
+// Serial begin
+void CRSF::begin() {
     port.begin(SERIAL_BAUDRATE);
 }
 
-//prepare data packet
-void CRSF::crsfPrepareDataPacket(uint8_t packet[], int16_t channels[]){
+// prepare data packet
+void CRSF::crsfPrepareDataPacket(uint8_t packet[], int16_t channels[]) {
 
-    //const uint8_t crc = crsf_crc8(&packet[2], CRSF_PACKET_SIZE-3);
+    // const uint8_t crc = crsf_crc8(&packet[2], CRSF_PACKET_SIZE-3);
     /*
      * Map 1000-2000 with middle at 1500 chanel values to
      * 173-1811 with middle at 992 S.BUS protocol requires
-     
-    */  
-
+    */
 
     // packet[0] = UART_SYNC; //Header
-    packet[0] = ELRS_ADDRESS; //Header
-    packet[1] = 24;   // length of type (24) + payload + crc
+    packet[0] = ELRS_ADDRESS; // Header
+    packet[1] = 24;           // length of type (24) + payload + crc
     packet[2] = TYPE_CHANNELS;
-    packet[3] = (uint8_t) (channels[0] & 0x07FF);
-    packet[4] = (uint8_t) ((channels[0] & 0x07FF)>>8 | (channels[1] & 0x07FF)<<3);
-    packet[5] = (uint8_t) ((channels[1] & 0x07FF)>>5 | (channels[2] & 0x07FF)<<6);
-    packet[6] = (uint8_t) ((channels[2] & 0x07FF)>>2);
-    packet[7] = (uint8_t) ((channels[2] & 0x07FF)>>10 | (channels[3] & 0x07FF)<<1);
-    packet[8] = (uint8_t) ((channels[3] & 0x07FF)>>7 | (channels[4] & 0x07FF)<<4);
-    packet[9] = (uint8_t) ((channels[4] & 0x07FF)>>4 | (channels[5] & 0x07FF)<<7);
-    packet[10] = (uint8_t) ((channels[5] & 0x07FF)>>1);
-    packet[11] = (uint8_t) ((channels[5] & 0x07FF)>>9 | (channels[6] & 0x07FF)<<2);
-    packet[12] = (uint8_t) ((channels[6] & 0x07FF)>>6 | (channels[7] & 0x07FF)<<5);
-    packet[13] = (uint8_t) ((channels[7] & 0x07FF)>>3);
-    packet[14] = (uint8_t) ((channels[8] & 0x07FF));
-    packet[15] = (uint8_t) ((channels[8] & 0x07FF)>>8 | (channels[9] & 0x07FF)<<3);
-    packet[16] = (uint8_t) ((channels[9] & 0x07FF)>>5 | (channels[10] & 0x07FF)<<6);  
-    packet[17] = (uint8_t) ((channels[10] & 0x07FF)>>2);
-    packet[18] = (uint8_t) ((channels[10] & 0x07FF)>>10 | (channels[11] & 0x07FF)<<1);
-    packet[19] = (uint8_t) ((channels[11] & 0x07FF)>>7 | (channels[12] & 0x07FF)<<4);
-    packet[20] = (uint8_t) ((channels[12] & 0x07FF)>>4  | (channels[13] & 0x07FF)<<7);
-    packet[21] = (uint8_t) ((channels[13] & 0x07FF)>>1);
-    packet[22] = (uint8_t) ((channels[13] & 0x07FF)>>9  | (channels[14] & 0x07FF)<<2);
-    packet[23] = (uint8_t) ((channels[14] & 0x07FF)>>6  | (channels[15] & 0x07FF)<<5);
-    packet[24] = (uint8_t) ((channels[15] & 0x07FF)>>3);
-    
-    packet[25] = crsf_crc8(&packet[2], packet[1]-1); //CRC
+    packet[3] = (uint8_t)(channels[0] & 0x07FF);
+    packet[4] = (uint8_t)((channels[0] & 0x07FF) >> 8 | (channels[1] & 0x07FF) << 3);
+    packet[5] = (uint8_t)((channels[1] & 0x07FF) >> 5 | (channels[2] & 0x07FF) << 6);
+    packet[6] = (uint8_t)((channels[2] & 0x07FF) >> 2);
+    packet[7] = (uint8_t)((channels[2] & 0x07FF) >> 10 | (channels[3] & 0x07FF) << 1);
+    packet[8] = (uint8_t)((channels[3] & 0x07FF) >> 7 | (channels[4] & 0x07FF) << 4);
+    packet[9] = (uint8_t)((channels[4] & 0x07FF) >> 4 | (channels[5] & 0x07FF) << 7);
+    packet[10] = (uint8_t)((channels[5] & 0x07FF) >> 1);
+    packet[11] = (uint8_t)((channels[5] & 0x07FF) >> 9 | (channels[6] & 0x07FF) << 2);
+    packet[12] = (uint8_t)((channels[6] & 0x07FF) >> 6 | (channels[7] & 0x07FF) << 5);
+    packet[13] = (uint8_t)((channels[7] & 0x07FF) >> 3);
+    packet[14] = (uint8_t)((channels[8] & 0x07FF));
+    packet[15] = (uint8_t)((channels[8] & 0x07FF) >> 8 | (channels[9] & 0x07FF) << 3);
+    packet[16] = (uint8_t)((channels[9] & 0x07FF) >> 5 | (channels[10] & 0x07FF) << 6);
+    packet[17] = (uint8_t)((channels[10] & 0x07FF) >> 2);
+    packet[18] = (uint8_t)((channels[10] & 0x07FF) >> 10 | (channels[11] & 0x07FF) << 1);
+    packet[19] = (uint8_t)((channels[11] & 0x07FF) >> 7 | (channels[12] & 0x07FF) << 4);
+    packet[20] = (uint8_t)((channels[12] & 0x07FF) >> 4 | (channels[13] & 0x07FF) << 7);
+    packet[21] = (uint8_t)((channels[13] & 0x07FF) >> 1);
+    packet[22] = (uint8_t)((channels[13] & 0x07FF) >> 9 | (channels[14] & 0x07FF) << 2);
+    packet[23] = (uint8_t)((channels[14] & 0x07FF) >> 6 | (channels[15] & 0x07FF) << 5);
+    packet[24] = (uint8_t)((channels[15] & 0x07FF) >> 3);
 
+    packet[25] = crsf_crc8(&packet[2], packet[1] - 1); // CRC
 }
 
-//prepare elrs setup packet (power, packet rate...)
-void CRSF::crsfPrepareCmdPacket(uint8_t packetCmd[],uint8_t command, uint8_t value)
-{
-  packetCmd[0] = ELRS_ADDRESS;
-  packetCmd[1] = 6; // length of Command (4) + payload + crc
-  packetCmd[2] = TYPE_SETTINGS_WRITE;
-  packetCmd[3] = ELRS_ADDRESS;
-  packetCmd[4] = ADDR_RADIO;
-  packetCmd[5] = command;
-  packetCmd[6] = value;
-  packetCmd[7] = crsf_crc8(&packetCmd[2], packetCmd[1]-1); //CRC
-
+// prepare elrs setup packet (power, packet rate...)
+void CRSF::crsfPrepareCmdPacket(uint8_t packetCmd[], uint8_t command, uint8_t value) {
+    packetCmd[0] = ELRS_ADDRESS;
+    packetCmd[1] = 6; // length of Command (4) + payload + crc
+    packetCmd[2] = TYPE_SETTINGS_WRITE;
+    packetCmd[3] = ELRS_ADDRESS;
+    packetCmd[4] = ADDR_RADIO;
+    packetCmd[5] = command;
+    packetCmd[6] = value;
+    packetCmd[7] = crsf_crc8(&packetCmd[2], packetCmd[1] - 1); // CRC
 }
 
-void CRSF::CrsfWritePacket(uint8_t packet[],uint8_t packetLength){
-    port.write(packet,packetLength);
+void CRSF::CrsfWritePacket(uint8_t packet[], uint8_t packetLength) {
+    port.write(packet, packetLength);
 }
