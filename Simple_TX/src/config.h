@@ -22,12 +22,12 @@
  Simple TX CONFIG OPTIONS (comment out unneeded options)
  =======================================================================================================
  */
-// Define RC input limite
-/*
-#define RC_CHANNEL_MIN 172
-#define RC_CHANNEL_MID 991
-#define RC_CHANNEL_MAX 1811
-*/
+// Define analogy input limite
+
+#define ADC_MIN 0
+#define ADC_MID 511
+#define ADC_MAX 1023
+
 
 #define ANALOG_CUTOFF 150 // cut off lower and upper end to avoid un-symmetric joystick range in trade off resolution
 
@@ -45,6 +45,12 @@ int Elevator_OFFSET   = 0;
 int Throttle_OFFSET   = 0;
 int Rudder_OFFSET     = 0;
 #endif
+
+// Define Reverse 1=reverse
+int Is_Aileron_Reverse  =1;
+int Is_Elevator_Reverse =1;
+int Is_Throttle_Reverse =0;
+int Is_Rudder_Reverse   =0;
 
 // IO setup
 // pins that used for the Joystick

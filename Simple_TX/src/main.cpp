@@ -23,9 +23,7 @@
  */
 
 #include <Arduino.h>
-
 #include "EEPROM.h"
-
 #include "config.h"
 #include "crsf.h"
 #include "led.h"
@@ -69,7 +67,8 @@ bool calStatus=false;
 #define CALIB_VAL_ADDR  CALIB_MARK_ADDR + 1
 
 #define CALIB_CNT       5       // times of switch on/off
-#define CALIB_TMO       20000    // ms
+#define CALIB_CENT_TMO  5000    //ms
+#define CALIB_TMO       20000   // ms
 int     cal_reset = 0 ;
 
 struct CalibValues {
@@ -190,22 +189,47 @@ bool calibrationProcess() {
 
     while(cal_reset<1){
     const int centerValue = (1023 - ANALOG_CUTOFF - ANALOG_CUTOFF) / 2;
-    calValues.aileronMin    = centerValue;
-    calValues.aileronMax    = centerValue;
-    calValues.elevatorMin   = centerValue;
-    calValues.elevatorMax   = centerValue;
-    calValues.thrMin        = centerValue;
-    calValues.thrMax        = centerValue;
-    calValues.rudderMin     = centerValue;
-    calValues.rudderMax     = centerValue;
+    calValues.aileronMin     = centerValue;
+    calValues.aileronMax     = centerValue;
+    calValues.aileronCenter  = centerValue;
+    calValues.elevatorMin    = centerValue;
+    calValues.elevatorMax    = centerValue;
+    calValues.elevatorCenter = centerValue;
+    calValues.thrMin         = centerValue;
+    calValues.thrMax         = centerValue;
+    calValues.rudderMin      = centerValue;
+    calValues.rudderMax      = centerValue;
+    calValues.rudderCenter   = centerValue;
     cal_reset++;
     }
 
     currentMillis = millis();
 
+    if (currentMillis <CALIB_CENT_TMO){
+        // A Center
+        int val = analogRead(analogInPinAileron);
+        calValues.aileronCenter = val;
+        
+        // E Center
+        val = analogRead(analogInPinElevator);
+        calValues.elevatorCenter = val;
 
+        // R Center
+        val = analogRead(analogInPinRudder);
+        calValues.rudderCenter = val;
+    
+     Serial.print("Aileron_Min:");
+        Serial.print("Center Stick: AilerCenter:");
+        Serial.print(calValues.aileronCenter);
+        Serial.print(" ElevatorCenter:");
+        Serial.print(calValues.elevatorCenter);
+        Serial.print(" RudderCenter:");
+        Serial.print(calValues.rudderCenter);
+        Serial.println();
+        
+    }
     // 15 seconds for moving sticks
-    if (currentMillis < CALIB_TMO){
+    else if (currentMillis > CALIB_CENT_TMO && currentMillis < CALIB_TMO){
     //while ((calibrationTimerStart + CALIB_TMO ) < millis()) {
         // A Min-Max
         int val = analogRead(analogInPinAileron);
@@ -246,7 +270,7 @@ bool calibrationProcess() {
         if (millis() % 500 == 0) {
            // calibrationChirp(2);
         }
-        Serial.print("Aileron_Min:");
+        Serial.print("Mover stick full range: Aileron_Min:");
         Serial.print(calValues.aileronMin);
         Serial.print(" Max:");
         Serial.print(calValues.aileronMax);
@@ -258,6 +282,10 @@ bool calibrationProcess() {
         Serial.print(calValues.rudderMin);
         Serial.print(" Max:");
         Serial.print(calValues.rudderMax);
+        Serial.print(" ThrottleMin:");
+        Serial.print(calValues.thrMin);
+        Serial.print(" Max:");
+        Serial.print(calValues.thrMax);
         Serial.println();
 
 
@@ -382,18 +410,60 @@ void loop()
      * Handle analogy input
      */
     // constrain to avoid overflow
-    Aileron_value  = analogRead(analogInPinAileron)  + Aileron_OFFSET;
-    Elevator_value = analogRead(analogInPinElevator) + Elevator_OFFSET;
-    Throttle_value = analogRead(analogInPinThrottle) + Throttle_OFFSET;
-    Rudder_value   = analogRead(analogInPinRudder)   + Rudder_OFFSET;
+    int analogVal = analogRead(analogInPinAileron);
+    if (analogVal <= calValues.aileronCenter){
+        Aileron_value = map(analogVal,calValues.aileronMin,   calValues.aileronCenter, ADC_MIN, ADC_MID);
+    }
+    else{
+        Aileron_value = map(analogVal,calValues.aileronCenter,   calValues.aileronMax, ADC_MID+1, ADC_MAX);
+    }
+    
+    analogVal = analogRead(analogInPinElevator);
+    if (analogVal <= calValues.elevatorCenter){
+        Elevator_value = map(analogVal,calValues.elevatorMin,   calValues.elevatorCenter, ADC_MIN, ADC_MID);
+    }
+    else{
+        Elevator_value = map(analogVal,calValues.elevatorCenter,   calValues.elevatorMax, ADC_MID+1, ADC_MAX);
+    }
+
+    analogVal = analogRead(analogInPinThrottle);
+    Throttle_value = map(analogVal, calValues.thrMax, calValues.thrMin, ADC_MIN, ADC_MAX);
+
+    analogVal = analogRead(analogInPinRudder);
+    if (analogVal <= calValues.rudderCenter){
+        Rudder_value = map(analogVal,calValues.rudderMin,   calValues.rudderCenter, ADC_MIN, ADC_MID);
+    }
+    else{
+        Rudder_value = map(analogVal,calValues.rudderCenter,   calValues.rudderMax, ADC_MID+1, ADC_MAX);
+    }
+    
+    //Constrain value to avoid overflow
+    Aileron_value  = constrain(Aileron_value,  ADC_MIN, ADC_MAX); 
+    Elevator_value = constrain(Elevator_value, ADC_MIN, ADC_MAX); 
+    Throttle_value = constrain(Throttle_value, ADC_MIN, ADC_MAX); 
+    Rudder_value   = constrain(Rudder_value,   ADC_MIN, ADC_MAX); 
+
+    //Handdle reverse
+    if (Is_Aileron_Reverse == 1){
+        Aileron_value  = 1023-Aileron_value;
+    }
+    if (Is_Elevator_Reverse == 1){
+        Elevator_value = 1023-Elevator_value;
+    }
+    if (Is_Throttle_Reverse == 1){
+        Throttle_value = 1023-Throttle_value;
+    }
+    if (Is_Rudder_Reverse == 1){
+        Rudder_value   = 1023-Rudder_value;
+    }
     // rcChannels[AILERON] = map(Aileron_value, 1023 - ANALOG_CUTOFF, ANALOG_CUTOFF, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);   // reverse
     // rcChannels[ELEVATOR] = map(Elevator_value, 1023 - ANALOG_CUTOFF, ANALOG_CUTOFF, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX); // reverse
     // rcChannels[THROTTLE] = map(Throttle_value, 1023 - ANALOG_CUTOFF, ANALOG_CUTOFF, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX); // reverse
     // rcChannels[RUDDER] = map(Rudder_value, ANALOG_CUTOFF, 1023 - ANALOG_CUTOFF, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);
-    rcChannels[AILERON]   = constrain(map(Aileron_value,    calValues.aileronMax,   calValues.aileronMin,   CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX), CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX); // reverse
-    rcChannels[ELEVATOR]  = constrain(map(Elevator_value,   calValues.elevatorMax,  calValues.elevatorMin,  CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX), CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX); // reverse
-    rcChannels[THROTTLE]  = constrain(map(Throttle_value,   calValues.thrMax,       calValues.thrMin,       CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX), CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX); // reverse
-    rcChannels[RUDDER]    = constrain(map(Rudder_value,     calValues.rudderMin,    calValues.rudderMax,    CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX), CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);
+    rcChannels[AILERON]   = map(Aileron_value,  ADC_MIN, ADC_MAX, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX); 
+    rcChannels[ELEVATOR]  = map(Elevator_value, ADC_MIN, ADC_MAX, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);
+    rcChannels[THROTTLE]  = map(Throttle_value, ADC_MIN, ADC_MAX, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);
+    rcChannels[RUDDER]    = map(Rudder_value,   ADC_MIN, ADC_MAX, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);
 
     /*
      * Handel digital input
@@ -404,9 +474,9 @@ void loop()
     // AUX4_value = digitalRead(DIGITAL_PIN_SWITCH_AUX4);// reuse for LED
 
     // Aux Channels
-    rcChannels[AUX1] = (AUX1_Arm == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+    rcChannels[AUX1] = (AUX1_Arm == 0)   ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
     rcChannels[AUX2] = (AUX2_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-    rcChannels[AUX3] = (AUX3_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+    rcChannels[AUX3] = (AUX3_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
     // rcChannels[AUX4] = (AUX4_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
 
     selectSetting();
