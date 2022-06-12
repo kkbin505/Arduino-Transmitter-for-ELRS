@@ -11,11 +11,16 @@ https://www.youtube.com/watch?v=BPLFkZUoV28
 1. Add center stick calibration
 2. Optimze channel reverse
 	use 4 values to handdle reverse in config.h
-	// Define Reverse 1 = reverse, 0 = normal
-	Is_Aileron_Reverse  =1;
-	Is_Elevator_Reverse =1;
-	Is_Throttle_Reverse =0;
-	Is_Rudder_Reverse   =0;
+	
+// Define Reverse 1 = reverse, 0 = normal
+	
+Is_Aileron_Reverse  =1;
+	
+Is_Elevator_Reverse =1;
+	
+Is_Throttle_Reverse =0;
+	
+Is_Rudder_Reverse   =0;
 
 ### 2022/5/29 Calibration added
 
