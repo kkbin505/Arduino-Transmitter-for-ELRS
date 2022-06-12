@@ -10,9 +10,9 @@ This is an Arduino based RC transmitter TX.
 - 4 analog channel
 - 4 AUX channel
 
-This project includes code, stl file for transmitter shell and pcb board, you can easily diy your own rc transmitter from arduino development in a very simple way.
+This project includes code, stl file for transmitter shell and pcb board, you can easily diy your own rc transmitter from arduino development board in a very simple way.
 
-I have tested for 6 month since the first prototype (mode from an old Devo7), it is stable for me.
+I have tested for 6 month since the first prototype (mod from an old Devo7), it works pretty well.
 
  * Simple TX is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY. 
 
