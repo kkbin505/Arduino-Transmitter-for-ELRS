@@ -15,20 +15,15 @@
  * along with Cleanflight.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+uint8_t ledState = LOW;
+unsigned long previousMillis = 0;
 
+void blinkLED(int ledPin, uint16_t blinkRate) {
+    unsigned long currentMillis = millis();
 
-
- uint8_t readVoltage() {
-    int voltageA = 0;
-    float voltageB;
-
-    analogRead(VOLTAGE_READ_PIN); // first fake read to improve further readings accuracy (as suggested by Nicola Gorghetto)
-
-    for (uint8_t i = 0; i < VOLTAGE_READS; i++) {
-        voltageA += analogRead(VOLTAGE_READ_PIN);
+    if (currentMillis - previousMillis >= blinkRate) {
+        previousMillis = currentMillis;     // save the last time you blinked the LED
+        ledState ^= 1;                      // if the LED is off turn it on and vice-versa
+        digitalWrite(ledPin, ledState);
     }
-
-    voltageA = voltageA/VOLTAGE_READS; // average of VOLTAGE_READS readings
-    voltageB=voltageA/33;
-    return voltageB;
 }

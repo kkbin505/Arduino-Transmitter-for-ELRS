@@ -6,6 +6,32 @@ Add video:
 
 https://www.youtube.com/watch?v=BPLFkZUoV28
 
+### 2022/6/3 Optimize Calibration
+
+1. Add center stick calibration
+2. Optimze channel reverse
+	use 4 values to handdle reverse in config.h
+	// Define Reverse 1 = reverse, 0 = normal
+	Is_Aileron_Reverse  =1;
+	Is_Elevator_Reverse =1;
+	Is_Throttle_Reverse =0;
+	Is_Rudder_Reverse   =0;
+
+### 2022/5/29 Calibration added
+
+Calibration function added by erstec in Platformio_test_branch, thanks
+
+1. enter debug mode by uncomment #define DEBUG
+2. flash firmware to arduino nano
+3. open serial monitor at 115200 baud, and move stick full range within 20 seconds untill you see "Calibration Done"
+4. comment //#define DEBUG and flash firmware to arduino nano
+5. test in bf configurator
+6. done
+
+### 2022/4/6 Test branch
+
+platformio
+
 
 ### Update Log 2022/4/3
 
