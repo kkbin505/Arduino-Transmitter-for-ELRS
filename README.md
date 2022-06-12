@@ -2,6 +2,8 @@
 
 This is an Arduino based RC transmitter TX.
 
+![微信图片_20220213205906](https://user-images.githubusercontent.com/43392862/153756463-16c5e99b-b1b6-4f23-9fea-cefb4bb9df04.jpg)
+
 # Features:
 - Support ExpressLRS 2.4G external TX module
 - Up to 500Hz packet rate
@@ -18,7 +20,7 @@ I use superslim module in the shell, but any esp32 based tx module should be wor
 
 It was tested for ELRS 1.0 and 2.0.
 
-![微信图片_20220213205906](https://user-images.githubusercontent.com/43392862/153756463-16c5e99b-b1b6-4f23-9fea-cefb4bb9df04.jpg)
+
 
 
 ### The development was moved to VS code and platformio
