@@ -1,8 +1,20 @@
+# Simple TX
 
-This Transmitter is inspired by cruwallero:
-https://github.com/cruwaller/elrs_handset
+This is an Arduino based RC transmitter TX.
+Features:
+- Support ExpressLRS 2.4G external TX module
+- Serial communicatin （Up to 250Hz packet rate）
+- 4 analog channel
+- 4 AUX channel
 
-Add video:
+
+### The development was moved to VS code and platformio
+
+The old version will was saved in the v0.93 branch
+
+New feature will be most likely happen in the main branch
+
+video:
 
 https://www.youtube.com/watch?v=BPLFkZUoV28
 
@@ -28,10 +40,11 @@ Calibration function added by erstec in Platformio_test_branch, thanks
 
 1. enter debug mode by uncomment #define DEBUG
 2. flash firmware to arduino nano
-3. open serial monitor at 115200 baud, and move stick full range within 20 seconds untill you see "Calibration Done"
-4. comment //#define DEBUG and flash firmware to arduino nano
-5. test in bf configurator
-6. done
+4. open serial monitor at 115200 baud, center stick and keep for 5 seconds
+5. move stick full range within 20 seconds untill you see "Calibration Done"
+6. comment //#define DEBUG and flash firmware to arduino nano
+7. test in bf configurator
+8. done
 
 ### 2022/4/6 Test branch
 
@@ -105,14 +118,7 @@ Hold AILERON right and ELEVATOR up at power up.
 
 Center stick will keep your previous setting.
 
-# Simple TX
 
-This is an Arduino based RC transmitter TX.
-Features:
-- Support ExpressLRS 2.4G external TX module
-- Serial communicatin （Up to 250Hz packet rate）
-- 4 analog channel
-- 4 AUX channel
 - M7 hall Gimbal
 
 ![微信图片_20220123195009](https://user-images.githubusercontent.com/43392862/150677087-87a9d849-5e43-41d2-8526-66564b54dd8e.jpg)
@@ -173,6 +179,9 @@ This is still a working process project.
 ![IMG_20211227_221222](https://user-images.githubusercontent.com/43392862/147845217-37778ccd-7a42-4e84-9291-ddd86a3ed9e5.jpg)
 ![IMG_20211227_213607](https://user-images.githubusercontent.com/43392862/147845218-07ae3f93-578e-45b4-b0da-48cd59fea7bb.jpg)
 
+
+This Transmitter is inspired by cruwallero:
+https://github.com/cruwaller/elrs_handset
 
 Some code are based on  Pawel's amazing work on SBUS generate code.
 
