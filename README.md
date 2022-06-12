@@ -128,10 +128,6 @@ Hold AILERON right and ELEVATOR up at power up.
 Center stick will keep your previous setting.
 
 
-- M7 hall Gimbal
-
-![微信图片_20220123195009](https://user-images.githubusercontent.com/43392862/150677087-87a9d849-5e43-41d2-8526-66564b54dd8e.jpg)
-
 Due to the hardware limitation of the ATMega328p, the follow functions are not supported:
 
 * The 328p do not support inverted UART (which OpenTX use), there are 2 options:
