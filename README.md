@@ -3,9 +3,21 @@
 This is an Arduino based RC transmitter TX.
 Features:
 - Support ExpressLRS 2.4G external TX module
-- Serial communicatin （Up to 250Hz packet rate）
+- Serial communicatin （Up to 500Hz packet rate）
 - 4 analog channel
 - 4 AUX channel
+
+This project includes code, stl file for transmitter shell and pcb board, you can easily diy your own rc transmitter from arduino development in a very simple way.
+
+I have tested for 6 month since the first prototype (mode from an old Devo7), it is stable for me.
+
+ * Simple TX is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY. 
+
+I use superslim module in the shell, but any esp32 based tx module should be working.
+
+It was tested for ELRS 1.0 and 2.0.
+
+![微信图片_20220213205906](https://user-images.githubusercontent.com/43392862/153756463-16c5e99b-b1b6-4f23-9fea-cefb4bb9df04.jpg)
 
 
 ### The development was moved to VS code and platformio
@@ -78,9 +90,6 @@ Update PPM to ELRS library, siginal is more stable, still need more test
 https://github.com/kkbin505/Arduino-Transmitter-for-ELRS/tree/main/PPMtoCRSF
 
 
-### Upload STL File
-
-![微信图片_20220213205906](https://user-images.githubusercontent.com/43392862/153756463-16c5e99b-b1b6-4f23-9fea-cefb4bb9df04.jpg)
 
 ### Update Log V0.9.3
 Increase baud rate to 400K
