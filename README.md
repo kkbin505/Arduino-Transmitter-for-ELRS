@@ -4,7 +4,7 @@ This is an Arduino based RC transmitter TX.
 
 # Features:
 - Support ExpressLRS 2.4G external TX module
-- Serial communicatin （Up to 500Hz packet rate）
+- Up to 500Hz packet rate
 - 4 analog channel
 - 4 AUX channel
 
