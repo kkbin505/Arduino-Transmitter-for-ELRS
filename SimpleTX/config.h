@@ -48,7 +48,7 @@ int Rudder_OFFSET     = 0;
 
 // Define Reverse 1=reverse
 int Is_Aileron_Reverse  =1;
-int Is_Elevator_Reverse =1;
+int Is_Elevator_Reverse =0;
 int Is_Throttle_Reverse =0;
 int Is_Rudder_Reverse   =0;
 

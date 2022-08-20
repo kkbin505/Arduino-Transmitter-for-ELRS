@@ -1,0 +1,5 @@
+{
+    "board": "arduino:avr:leonardo",
+    "sketch": "SimpleTX.ino",
+    "port": "/dev/tty.usbserial-1420"
+}
