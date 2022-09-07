@@ -4,3 +4,11 @@ Add STL file for print
 
 
 ![ASSEMBLE](https://user-images.githubusercontent.com/43392862/160217729-81108e26-133e-49e3-99d4-6dcfcf1451c4.jpg)
+
+
+Add a modify file from: https://github.com/cruwaller/elrs_handset/tree/master/revision_A/shell
+
+Delete 2 top side switchs, modify front side switch to rectangle 19*7mm switch， give this design more tango2 kind of taste
+
+Add a open on the lower side for usb 
+
