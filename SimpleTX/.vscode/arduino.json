@@ -1,5 +1,6 @@
 {
-    "board": "arduino:avr:leonardo",
+    "board": "arduino:avr:nano",
     "sketch": "SimpleTX.ino",
-    "port": "/dev/tty.usbserial-1420"
+    "port": "COM5",
+    "configuration": "cpu=atmega328"
 }

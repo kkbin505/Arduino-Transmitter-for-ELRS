@@ -474,9 +474,9 @@ void loop()
     // AUX4_value = digitalRead(DIGITAL_PIN_SWITCH_AUX4);// reuse for LED
 
     // Aux Channels
-    rcChannels[AUX1] = (AUX1_Arm == 0)   ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-    rcChannels[AUX2] = (AUX2_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-    rcChannels[AUX3] = (AUX3_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+    rcChannels[AUX1] = (AUX1_Arm == 1)   ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+    rcChannels[AUX2] = (AUX2_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+    rcChannels[AUX3] = (AUX3_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
     // rcChannels[AUX4] = (AUX4_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
 
     selectSetting();
