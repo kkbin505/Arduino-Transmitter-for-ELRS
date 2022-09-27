@@ -28,6 +28,7 @@
 
 // Define AUX channel input limite
 #define CRSF_DIGITAL_CHANNEL_MIN 172
+#define CRSF_DIGITAL_CHANNEL_MID 992
 #define CRSF_DIGITAL_CHANNEL_MAX 1811
 
 // internal crsf variables
@@ -57,7 +58,7 @@
 #define ELRS_BLE_JOYSTIC_COMMAND        17
 #define TYPE_SETTINGS_WRITE             0x2D
 #define ADDR_RADIO                      0xEA //  Radio Transmitter
-#define port                            Serial
+#define port                            Serial1
 
 class CRSF {
 public:

@@ -16,8 +16,10 @@
             "intelliSenseMode": "gcc-x64",
             "includePath": [
                 "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\cores\\arduino",
-                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\variants\\eightanaloginputs",
+                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\variants\\leonardo",
                 "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\EEPROM\\src",
+                "C:\\Users\\kkbin\\Documents\\Arduino\\libraries\\MPU9250",
+                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\Wire\\src",
                 "c:\\program files (x86)\\arduino\\hardware\\tools\\avr\\lib\\gcc\\avr\\4.9.2\\include",
                 "c:\\program files (x86)\\arduino\\hardware\\tools\\avr\\lib\\gcc\\avr\\4.9.2\\include-fixed",
                 "c:\\program files (x86)\\arduino\\hardware\\tools\\avr\\avr\\include"
@@ -30,8 +32,12 @@
             "defines": [
                 "F_CPU=16000000L",
                 "ARDUINO=10805",
-                "ARDUINO_AVR_NANO",
+                "ARDUINO_AVR_LEONARDO",
                 "ARDUINO_ARCH_AVR",
+                "USB_VID=0x2341",
+                "USB_PID=0x8036",
+                "USB_MANUFACTURER=\"Unknown\"",
+                "USB_PRODUCT=\"Arduino Leonardo\"",
                 "__DBL_MIN_EXP__=(-125)",
                 "__HQ_FBIT__=15",
                 "__UINT_LEAST16_MAX__=65535U",

@@ -27,7 +27,9 @@
 #include "config.h"
 #include "crsf.h"
 #include "led.h"
+#include "MPU9250.h" // library https://github.com/hideakitai/MPU9250
 
+#define GYRO  //Support MPU9250 as input instead of Gimbal
 //#define DEBUG // if not commented out, Serial.print() is active! For debugging only!!
 
 int Aileron_value = 0; // values read from the pot
@@ -58,6 +60,11 @@ uint32_t crsfTime = 0;
 CRSF crsfClass;
 
 bool calStatus=false;
+
+// -----------------------------------------------------------------------------------------------------
+// MPU9250 initiate
+MPU9250 mpu;
+
 
 // -----------------------------------------------------------------------------------------------------
 // Calibration
@@ -355,6 +362,9 @@ void setup()
     // digitalWrite(DIGITAL_PIN_BUZZER, LOW);
     // inialize voltage:
     batteryVoltage = 0.0;
+
+
+
 #ifdef PPMOUTPUT
     pinMode(ppmPin, OUTPUT);
     digitalWrite(ppmPin, !onState); // set the PPM signal pin to the default state (off)
@@ -368,7 +378,7 @@ void setup()
     sei();
 #endif
 
-    delay(1000); // Give enough time for uploda firmware 1 second
+    delay(1000); // Give enough time for upload firmware 1 second
 
     #ifdef DEBUG
         Serial.begin(115200);
@@ -385,6 +395,18 @@ void setup()
 
     #ifdef DEBUG
         Serial.println("Start Calibration");  
+    #endif
+    Serial.begin(115200);
+    Wire.begin();
+    delay(2000);
+
+    #ifdef GYRO
+        if (!mpu.setup(0x68)) {  // change to your own address
+            while (1) {
+                Serial.println("MPU connection failed. Please check your connection with `connection_check` example.");
+                delay(5000);
+        }
+    }
     #endif
 }
 
@@ -406,11 +428,31 @@ void loop()
         // fastBlinkLED(DIGITAL_PIN_LED, 300);
     }
 
+
+     if (mpu.update()) {
+            static uint32_t prev_ms = millis();
+            if (millis() > prev_ms + 25) {
+                //print_roll_pitch_yaw();
+                //Rudder_value   = mpu.getYaw();
+                Serial.print("Roll, Pitch, Yaw: ");
+                Serial.print(Aileron_value);
+                Serial.print(", ");
+                Serial.println(Elevator_value);
+                prev_ms = millis();
+            }
+        }
+        Aileron_value  = map(constrain(int(mpu.getRoll() *100),-9000,9000),-9000,9000,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX);
+        Elevator_value = map(constrain(int(mpu.getPitch()*100),-9000,9000),9000,-9000,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX);
+        Rudder_value   = map(constrain(int(mpu.getYaw()*100-3400),-4000,4000),4000,-4000,CRSF_DIGITAL_CHANNEL_MIN,CRSF_DIGITAL_CHANNEL_MAX);
+
+
     /*
      * Handle analogy input
      */
     // constrain to avoid overflow
     int analogVal = analogRead(analogInPinAileron);
+   /*
+
     if (analogVal <= calValues.aileronCenter){
         Aileron_value = map(analogVal,calValues.aileronMin,   calValues.aileronCenter, ADC_MIN, ADC_MID);
     }
@@ -426,9 +468,6 @@ void loop()
         Elevator_value = map(analogVal,calValues.elevatorCenter,   calValues.elevatorMax, ADC_MID+1, ADC_MAX);
     }
 
-    analogVal = analogRead(analogInPinThrottle);
-    Throttle_value = map(analogVal, calValues.thrMax, calValues.thrMin, ADC_MIN, ADC_MAX);
-
     analogVal = analogRead(analogInPinRudder);
     if (analogVal <= calValues.rudderCenter){
         Rudder_value = map(analogVal,calValues.rudderMin,   calValues.rudderCenter, ADC_MIN, ADC_MID);
@@ -436,34 +475,44 @@ void loop()
     else{
         Rudder_value = map(analogVal,calValues.rudderCenter,   calValues.rudderMax, ADC_MID+1, ADC_MAX);
     }
+    */
+
+    analogVal = analogRead(analogInPinThrottle);
+    Throttle_value = map(analogVal, calValues.thrMax, calValues.thrMin, ADC_MIN, ADC_MAX);
+
     
     //Constrain value to avoid overflow
-    Aileron_value  = constrain(Aileron_value,  ADC_MIN, ADC_MAX); 
-    Elevator_value = constrain(Elevator_value, ADC_MIN, ADC_MAX); 
+    //Aileron_value  = constrain(Aileron_value,  ADC_MIN, ADC_MAX); 
+    //Elevator_value = constrain(Elevator_value, ADC_MIN, ADC_MAX); 
     Throttle_value = constrain(Throttle_value, ADC_MIN, ADC_MAX); 
-    Rudder_value   = constrain(Rudder_value,   ADC_MIN, ADC_MAX); 
+    //Rudder_value   = constrain(Rudder_value,   ADC_MIN, ADC_MAX); 
 
     //Handdle reverse
+   /*
     if (Is_Aileron_Reverse == 1){
         Aileron_value  = 1023-Aileron_value;
     }
     if (Is_Elevator_Reverse == 1){
         Elevator_value = 1023-Elevator_value;
     }
-    if (Is_Throttle_Reverse == 1){
-        Throttle_value = 1023-Throttle_value;
-    }
     if (Is_Rudder_Reverse == 1){
         Rudder_value   = 1023-Rudder_value;
     }
+    */
+   
+    if (Is_Throttle_Reverse == 1){
+        Throttle_value = 1023-Throttle_value;
+    }
+
     // rcChannels[AILERON] = map(Aileron_value, 1023 - ANALOG_CUTOFF, ANALOG_CUTOFF, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);   // reverse
     // rcChannels[ELEVATOR] = map(Elevator_value, 1023 - ANALOG_CUTOFF, ANALOG_CUTOFF, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX); // reverse
     // rcChannels[THROTTLE] = map(Throttle_value, 1023 - ANALOG_CUTOFF, ANALOG_CUTOFF, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX); // reverse
     // rcChannels[RUDDER] = map(Rudder_value, ANALOG_CUTOFF, 1023 - ANALOG_CUTOFF, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);
-    rcChannels[AILERON]   = map(Aileron_value,  ADC_MIN, ADC_MAX, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX); 
-    rcChannels[ELEVATOR]  = map(Elevator_value, ADC_MIN, ADC_MAX, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);
-    rcChannels[THROTTLE]  = map(Throttle_value, ADC_MIN, ADC_MAX, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);
-    rcChannels[RUDDER]    = map(Rudder_value,   ADC_MIN, ADC_MAX, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);
+    rcChannels[AILERON]   = Aileron_value;
+    rcChannels[ELEVATOR]  = Elevator_value;
+    
+    rcChannels[THROTTLE]  = CRSF_DIGITAL_CHANNEL_MIN; //map(Throttle_value, ADC_MIN, ADC_MAX, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);
+    rcChannels[RUDDER]    = Rudder_value; //map(Rudder_value,   ADC_MIN, ADC_MAX, CRSF_DIGITAL_CHANNEL_MIN, CRSF_DIGITAL_CHANNEL_MAX);
 
     /*
      * Handel digital input
