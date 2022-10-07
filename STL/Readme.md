@@ -10,5 +10,7 @@ Add a modify file from: https://github.com/cruwaller/elrs_handset/tree/master/re
 
 Delete 2 top side switchs, modify front side switch to rectangle 19*7mm switch， give this design more tango2 kind of taste
 
+Add gimbal protect for M7, print in TPU 20%
+
 Add a open on the lower side for usb 
 
