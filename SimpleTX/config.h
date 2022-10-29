@@ -68,11 +68,14 @@ const int DIGITAL_PIN_SWITCH_AUX3 = 2;  //
 
 // pins that used for output
 const int DIGITAL_PIN_LED = 5;    // in pcb v0.9 led is reused from AUX4 (remember to add 300om resistor in led)
-const int DIGITAL_PIN_BUZZER = 7; // do not use in pcb v0.9
+//const int DIGITAL_PIN_BUZZER = 7; // do not use in pcb v0.9
 
+// pins that used for buzzer
+const int DIGITAL_PIN_BUZZER = 6;
 //----- Voltage monitoring -------------------------
 // Define battery warning voltage
-const float WARNING_VOLTAGE = 7.4; // 2S Lipo
+const float WARNING_VOLTAGE = 7.4; // 2S Lipo 3.7v per cell
+const float BEEPING_VOLTAGE = 7.0; // 2S Lipo 3.5v per cell
 
 // Define Commond for start Up Setting
 #define RC_MIN_COMMAND 600

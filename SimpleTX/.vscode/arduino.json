@@ -1,4 +1,5 @@
 {
     "board": "arduino:avr:nano",
-    "port": "COM5"
+    "port": "COM5",
+    "sketch": "SimpleTX.ino"
 }

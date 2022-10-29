@@ -27,6 +27,7 @@
 #include "config.h"
 #include "crsf.h"
 #include "led.h"
+#include "tone.h"
 
 //#define DEBUG // if not commented out, Serial.print() is active! For debugging only!!
 
@@ -401,9 +402,11 @@ void loop()
     // Read Voltage
     batteryVoltage = analogRead(VOLTAGE_READ_PIN) / 103.0f; // 98.5
 
-    if (batteryVoltage < WARNING_VOLTAGE) {
+    if (batteryVoltage < WARNING_VOLTAGE && batteryVoltage >= BEEPING_VOLTAGE) {
         blinkLED(DIGITAL_PIN_LED, 1000);
-        // fastBlinkLED(DIGITAL_PIN_LED, 300);
+    }else if(batteryVoltage < BEEPING_VOLTAGE){
+        blinkLED(DIGITAL_PIN_LED, 300);
+        playingTones(2);
     }
 
     /*
