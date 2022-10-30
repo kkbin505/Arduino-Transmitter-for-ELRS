@@ -30,11 +30,13 @@
 #include "tone.h"
 
 //#define DEBUG // if not commented out, Serial.print() is active! For debugging only!!
+//#define GIMBAL_CALIBRATION // if not commented out, Serial.print() is active! For debugging only!!
 
 int Aileron_value = 0; // values read from the pot
 int Elevator_value = 0;
 int Throttle_value = 0;
 int Rudder_value = 0;
+int previous_throttle = 191;
 
 int loopCount = 0; // for ELRS seeting
 
@@ -48,6 +50,9 @@ float batteryVoltage;
 int currentPktRate = 0;
 int currentPower = 0;
 int currentSetting = 0;
+int stickMoved = 0;
+int stickInt = 0;
+uint32_t stickMovedMillis = 0;
 
 uint32_t currentMillis = 0;
 
@@ -122,7 +127,6 @@ void calibrationReset() {
 uint8_t aux2cnt = 0;
 
 unsigned long calibrationTimerStart;
-
 
 //Flash LED and beep for (times)
 void calibrationChirp(uint8_t times) {
@@ -339,6 +343,25 @@ void selectSetting() {
     }
 }
 
+bool checkStickMove(){
+    // check if stick moved, warring after 10 minutes
+    if(abs(previous_throttle - rcChannels[THROTTLE]) < 30){
+        stickMoved = 0;
+        //Serial.println(abs(previous_throttle - rcChannels[THROTTLE]));
+    }else{
+        previous_throttle = rcChannels[THROTTLE];
+        stickMovedMillis = millis();
+        stickMoved = 1;
+    }
+
+    if (millis() - stickMovedMillis > STICK_ALARM_TIME){
+       // Serial.println((millis() - stickMovedMillis));
+        return true;
+    }else{
+        return false;
+    }
+}
+
 void setup()
 {
     // inialize rc data
@@ -373,10 +396,16 @@ void setup()
 
     #ifdef DEBUG
         Serial.begin(115200);
-        //calibrationReset();
-        calStatus = true;
+
     #else
         crsfClass.begin();
+    #endif
+
+    #ifdef GIMBAL_CALIBRATION
+        Serial.begin(115200);
+        //calibrationReset();
+        calStatus = true;
+        Serial.println("Start Calibration"); 
     #endif
 
     digitalWrite(DIGITAL_PIN_LED, HIGH); // LED ON
@@ -384,14 +413,11 @@ void setup()
     //calibrationReset();
     calibrationLoad();
 
-    #ifdef DEBUG
-        Serial.println("Start Calibration");  
-    #endif
 }
 
 void loop()
 {
-    #ifdef DEBUG
+    #ifdef GIMBAL_CALIBRATION
         if(calStatus ){
             calibrationRun(AUX1_Arm, AUX2_value);
         }
@@ -407,6 +433,11 @@ void loop()
     }else if(batteryVoltage < BEEPING_VOLTAGE){
         blinkLED(DIGITAL_PIN_LED, 300);
         playingTones(2);
+    }
+
+    if (checkStickMove() == true){
+        blinkLED(DIGITAL_PIN_LED, 100);
+        playingTones(5);
     }
 
     /*
@@ -482,11 +513,29 @@ void loop()
     rcChannels[AUX3] = (AUX3_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
     // rcChannels[AUX4] = (AUX4_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
 
+    if(stickInt=0){
+        previous_throttle=rcChannels[THROTTLE];
+        stickInt=1;
+    }
     selectSetting();
 
     if (currentMicros > crsfTime) {
         #ifdef DEBUG
-            //Serial.println("test");
+            //Serial.println("DEBUG");
+        Serial.print(" AILERON:");
+        Serial.print(rcChannels[AILERON]);
+        Serial.print(" ELEVATOR:");
+        Serial.print(rcChannels[ELEVATOR] );
+        Serial.print(" THROTTLE:");
+        Serial.print(rcChannels[THROTTLE]);
+        Serial.print(" RUDDER:");
+        Serial.print(rcChannels[RUDDER] );
+        Serial.print(" stickstatus:");
+        Serial.print(stickMoved);
+        Serial.print(" previous_throttle:");
+        Serial.print(previous_throttle);
+        Serial.println();
+
         #else
             if (loopCount <= 500) { // repeat 500 packets to build connection to TX module
                 // Build commond packet
@@ -495,7 +544,7 @@ void loop()
                 loopCount++;
             }
 
-            if (loopCount > 500 && loopCount <= 505) { // repeat 500 packets to build connection to TX module
+            if (loopCount > 500 && loopCount <= 505) { // repeat 5 packets to avoid bad packet, change rate setting
                 // Build commond packet
                 if (currentSetting > 0) {
                     crsfClass.crsfPrepareCmdPacket(crsfCmdPacket, ELRS_PKT_RATE_COMMAND, currentPktRate);
@@ -503,7 +552,7 @@ void loop()
                     crsfClass.CrsfWritePacket(crsfCmdPacket, CRSF_CMD_PACKET_SIZE);
                 }
                 loopCount++;
-            } else if (loopCount > 505 && loopCount < 510) { // repeat 10 packets to avoid bad packet
+            } else if (loopCount > 505 && loopCount < 510) { // repeat 10 packets to avoid bad packet, change TX power level
                 if (currentSetting > 0) {
                     crsfClass.crsfPrepareCmdPacket(crsfCmdPacket, ELRS_POWER_COMMAND, currentPower);
                     // buildElrsPacket(crsfCmdPacket,ELRS_WIFI_COMMAND,0x01);
