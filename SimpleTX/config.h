@@ -81,7 +81,7 @@ const float BEEPING_VOLTAGE = 7.0; // 2S Lipo 3.5v per cell
 #define RC_MIN_COMMAND 600
 #define RC_MAX_COMMAND 1400
 
-// Define stick unmove alarm time
+// Define stick unmove alarm time in million seconds
 #define STICK_ALARM_TIME 30000
 
 // from https://github.com/DeviationTX/deviation/pull/1009/ ELRS menu implement in deviation TX
