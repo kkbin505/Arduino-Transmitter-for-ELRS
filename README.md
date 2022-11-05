@@ -20,7 +20,9 @@ I use superslim module in the shell, but any esp32 based tx module should be wor
 
 It was tested for ELRS 1.0 and 2.0.
 
+video:
 
+https://www.youtube.com/watch?v=BPLFkZUoV28
 
 
 ### The development was moved to VS code 
@@ -34,10 +36,6 @@ The PIO becomes unusable dude to unstalbe network, so I switch back to arduino e
 The code still works in Arduino IDE, you can compile in both enviroment
 
 The PIO will be saved in a seprate branch and will unliked be updated
-
-video:
-
-https://www.youtube.com/watch?v=BPLFkZUoV28
 
 ### 2022/6/3 Optimize Calibration
 
