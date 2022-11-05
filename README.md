@@ -23,11 +23,17 @@ It was tested for ELRS 1.0 and 2.0.
 
 
 
-### The development was moved to VS code and platformio
+### The development was moved to VS code 
 
-The old version will was saved in the v0.93 branch
+### 2022/11/5 Move IDE to VSCODE and Arduino Extension
 
-New feature will be most likely happen in the main branch
+Add buzzer support on pin 6
+
+The PIO becomes unusable dude to unstalbe network, so I switch back to arduino extension, still in VSCODE, because the original Arduino IDE is low efficient.
+
+The code still works in Arduino IDE, you can compile in both enviroment
+
+The PIO will be saved in a seprate branch and will unliked be updated
 
 video:
 
