@@ -1,8 +1,13 @@
 # Simple TX
 
-This is an Arduino based RC transmitter TX.
+This is an Arduino based RC transmitter TX. I want to design a RC transmitter (soft and hardware) that is simple to build, and use arduino board wich I am familler with, and it should supoort ELRS.
 
 ![微信图片_20220213205906](https://user-images.githubusercontent.com/43392862/153756463-16c5e99b-b1b6-4f23-9fea-cefb4bb9df04.jpg)
+
+
+video:
+
+https://www.youtube.com/watch?v=BPLFkZUoV28
 
 # Features:
 - Support ExpressLRS 2.4G external TX module
@@ -20,10 +25,7 @@ I use superslim module in the shell, but any esp32 based tx module should be wor
 
 It was tested for ELRS 1.0 and 2.0.
 
-video:
-
-https://www.youtube.com/watch?v=BPLFkZUoV28
-
+### Update:
 
 ### The development was moved to VS code 
 
@@ -168,29 +170,49 @@ https://youtu.be/PrfSfnqcBgk
 I replace the control board with my PCB and system.
 
 
-
 ![微信图片_20220123195005](https://user-images.githubusercontent.com/43392862/150677082-80ab29c4-f2e4-475e-a4b3-db004aeacba5.jpg)
 
 
+### 1. Project Intro:
+
+### 1.1 Hardware (PCB)
+
+In PCB folder, you can find the PCB and BOM, the PCB is designed in Easyeda and files in Gerber type. I orderd my PCB use the Gerber file from JLCpcb.
+
+![EasyEDA(标准版) - 免费、易用、强大的在线电路设计软件 - Google Chrome 2022_1_23 19_47_16](https://user-images.githubusercontent.com/43392862/150677345-1feb8e57-7f06-45fc-b877-a0eb61f51f26.png)
+
+The PCB is v0.9 means it is not complete, but it works well at least for me. 
+
+The version includes 4 digital switch, but I forget to wire out the LED pint, so I use one channel for LED only 3 digital available. 
+
+The analogy channel support 3.3v gimbal (hall and poentional meter both works), the pin use 1.25 6p plug, it is the same pin order as most frsky gimbal (M7 for example). If you use orther gimbal pay attention to the pin order. I find jumper gimbal reversed GND(red) and 3.3V(black).
+
+I powered my board with 2S battery, the arduino nano have a decent LDO （ASM1117）, and the ELRS module also powerd from 2S.
+
+### 1.2 Firmware
+
+All source codes are in SimpleTX folder.
+
+It is writen in arduino frame use VScode, but arduino IDE should also work.
+
+### 1.3 CAD-Model
+
+3 versions of transmitter shell are available.
+
+1 is a remix from https://github.com/cruwaller/elrs_handset
+
+I removed 2 switch, and modify switch in front side from Switches to Tango2 like switch
+
+Front_Shell_REV-A_M7_kkbin_modify.stl
+
+2 is my design, it is compatibal with jumper TX 12 hall gimbal, very compact.
+
+SimpleTX_Top_v15.stl
+
+3 is for X9 lite gimbal, it feels too big for me.
 
 
-### Below is old prototype
-
-I replaced the control board in a DEVO 7 with arduino nano and DIY 2.4G Elrs module, after some wiring and codeing and it works.
-
-Make sure to uncheck uart_reverse when upload firmware to TX module, because the board do not support reverse uart. 
-
-Otherwise you need to use a digital revese cycle for example a NOT gate SN74LS06N.
-
-I need more test to see if it works stable.
-
-This is still a working process project. 
-
-![IMG_20211231_230305](https://user-images.githubusercontent.com/43392862/147845208-0726187d-0374-496a-80d1-303791e30d3f.jpg)
-![IMG_20211228_215915](https://user-images.githubusercontent.com/43392862/147845211-86a539c5-958d-44ce-be10-5ccce836f60c.jpg)
-![IMG_20211227_221222](https://user-images.githubusercontent.com/43392862/147845217-37778ccd-7a42-4e84-9291-ddd86a3ed9e5.jpg)
-![IMG_20211227_213607](https://user-images.githubusercontent.com/43392862/147845218-07ae3f93-578e-45b4-b0da-48cd59fea7bb.jpg)
-
+!!! Do not solder the buzzer, need to add triode in next version, I burned my board.
 
 This Transmitter is inspired by cruwallero:
 https://github.com/cruwaller/elrs_handset
