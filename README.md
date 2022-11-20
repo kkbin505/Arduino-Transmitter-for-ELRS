@@ -213,6 +213,8 @@ SimpleTX_Top_v15.stl
 
 
 !!! Do not solder the buzzer, need to add triode in next version, I burned my board.
+![buzzer](https://user-images.githubusercontent.com/43392862/202906574-64efb654-1023-4be7-9c3d-3a5a70b9f1aa.jpg)
+
 
 This Transmitter is inspired by cruwallero:
 https://github.com/cruwaller/elrs_handset
