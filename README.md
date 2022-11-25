@@ -1,5 +1,7 @@
 # Simple TX
 
+现已增加中文介绍，详情请看Wiki页面
+
 This is an Arduino based RC transmitter TX. I want to design a RC transmitter (soft and hardware) that is simple to build, and use arduino board wich I am familler with, and it should supoort ELRS.
 
 ![微信图片_20220213205906](https://user-images.githubusercontent.com/43392862/153756463-16c5e99b-b1b6-4f23-9fea-cefb4bb9df04.jpg)
