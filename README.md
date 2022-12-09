@@ -203,11 +203,18 @@ It is writen in arduino frame use VScode, but arduino IDE should also work.
 
 1 is a remix from https://github.com/cruwaller/elrs_handset
 
+![DSC00981](https://user-images.githubusercontent.com/43392862/206710142-ffb84e65-c567-4101-8fe2-d68fe21cae29.JPG)
+
 I removed 2 switch, and modify switch in front side from Switches to Tango2 like switch
+
+![DSC00982](https://user-images.githubusercontent.com/43392862/206710187-ea65c351-b675-4ccc-97e1-455140d3e338.JPG)
 
 Front_Shell_REV-A_M7_kkbin_modify.stl
 
 2 is my design, it is compatibal with jumper TX 12 hall gimbal, very compact.
+
+![DSC00988](https://user-images.githubusercontent.com/43392862/206710049-68ed9d0f-3812-43b5-ade6-776c0b12b786.JPG)
+
 
 SimpleTX_Top_v15.stl
 
