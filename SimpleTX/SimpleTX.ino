@@ -49,6 +49,7 @@ float batteryVoltage;
 
 int currentPktRate = 0;
 int currentPower = 0;
+int currentDynamic = 0;
 int currentSetting = 0;
 int stickMoved = 0;
 int stickInt = 0;
@@ -324,20 +325,27 @@ void calibrationRun(int aux1, int aux2) {
 // -----------------------------------------------------------------------------------------------------
 
 void selectSetting() {
-    // startup stick commands (protocol selection / renew transmitter ID)
+    // startup stick commands (rate/power selection / initiate bind / turn on tx module wifi)
+    // Right stick:
+    // Up Left - Rate/Power setting 1 (250hz / 100mw / Dynamic)
+    // Up Right - Rate/Power setting 2 (50hz / 100mw)
+    // Down Left - Start TX bind (for 3.4.2 it is now possible to bind to RX easily). Power cycle after binding
+    // Down Right - Start TX module wifi (for firmware update etc)
 
-    if (rcChannels[AILERON] < RC_MIN_COMMAND && rcChannels[ELEVATOR] < RC_MIN_COMMAND) { // Elevator down + aileron left
+    if (rcChannels[AILERON] < RC_MIN_COMMAND && rcChannels[ELEVATOR] > RC_MAX_COMMAND) { // Elevator up + aileron left
         currentPktRate = SETTING_1_PktRate;
         currentPower = SETTING_1_Power;
+        currentDynamic = SETTING_1_Dynamic;
         currentSetting = 1;
     } else if (rcChannels[AILERON] > RC_MAX_COMMAND && rcChannels[ELEVATOR] > RC_MAX_COMMAND) { // Elevator up + aileron right
         currentPktRate = SETTING_2_PktRate;
         currentPower = SETTING_2_Power;
+        currentDynamic = SETTING_2_Dynamic;
         currentSetting = 2;
-    } else if (rcChannels[AILERON] < RC_MIN_COMMAND && rcChannels[ELEVATOR] > RC_MAX_COMMAND) { // Elevator up + aileron right
-        currentPktRate = SETTING_3_PktRate;
-        currentPower = SETTING_3_Power;
-        currentSetting = 3;
+    } else if (rcChannels[AILERON] < RC_MIN_COMMAND && rcChannels[ELEVATOR] < RC_MIN_COMMAND) { // Elevator down + aileron left
+        currentSetting = 3;  // Bind
+    } else if (rcChannels[AILERON] > RC_MAX_COMMAND && rcChannels[ELEVATOR] < RC_MIN_COMMAND) { // Elevator down + aileron right
+        currentSetting = 4;  // TX Wifi
     } else {
         currentSetting = 0;
     }
@@ -392,7 +400,7 @@ void setup()
     sei();
 #endif
 
-    delay(1000); // Give enough time for uploda firmware 1 second
+    delay(2000); // Give enough time for uploading firmware (2 seconds)
 
     #ifdef DEBUG
         Serial.begin(115200);
@@ -430,10 +438,14 @@ void loop()
     batteryVoltage = analogRead(VOLTAGE_READ_PIN) / 103.0f; // 98.5
 
     if (batteryVoltage < WARNING_VOLTAGE && batteryVoltage >= BEEPING_VOLTAGE) {
-        blinkLED(DIGITAL_PIN_LED, 1000);
-    }else if(batteryVoltage < BEEPING_VOLTAGE){
-        blinkLED(DIGITAL_PIN_LED, 300);
+        blinkLED(DIGITAL_PIN_LED, 500);
+    }else if(batteryVoltage < BEEPING_VOLTAGE && batteryVoltage >= ON_USB){
+        blinkLED(DIGITAL_PIN_LED, 250);
         playingTones(2);
+    }else if(currentSetting == 3){
+        blinkLED(DIGITAL_PIN_LED, 100);  // Bind (fast flash)
+    }else if(currentSetting == 4){
+        blinkLED(DIGITAL_PIN_LED, 1000); // Wifi (slow flash)
     }
 
     if (checkStickMove() == true){
@@ -442,7 +454,7 @@ void loop()
     }
 
     /*
-     * Handle analogy input
+     * Handle analog input
      */
     // constrain to avoid overflow
     int analogVal = analogRead(analogInPinAileron);
@@ -511,14 +523,17 @@ void loop()
     // Aux Channels
     rcChannels[AUX1] = (AUX1_Arm == 1)   ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
     rcChannels[AUX2] = (AUX2_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-    rcChannels[AUX3] = (AUX3_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+    rcChannels[AUX3] = (AUX3_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
     // rcChannels[AUX4] = (AUX4_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
 
     if(stickInt=0){
         previous_throttle=rcChannels[THROTTLE];
         stickInt=1;
     }
-    selectSetting();
+    if (loopCount == 0) {
+        // Check if sticks are held in specific position on startup (bind/wifi/packet rate select)
+        selectSetting();
+    }
 
     if (currentMicros > crsfTime) {
         #ifdef DEBUG
@@ -547,24 +562,34 @@ void loop()
 
             if (loopCount > 500 && loopCount <= 505) { // repeat 5 packets to avoid bad packet, change rate setting
                 // Build commond packet
-                if (currentSetting > 0) {
+                if (currentSetting == 1 || currentSetting == 2) {
                     crsfClass.crsfPrepareCmdPacket(crsfCmdPacket, ELRS_PKT_RATE_COMMAND, currentPktRate);
-                    // buildElrsPacket(crsfCmdPacket,ELRS_WIFI_COMMAND,0x01);
+                    crsfClass.CrsfWritePacket(crsfCmdPacket, CRSF_CMD_PACKET_SIZE);
+                } else if (currentSetting == 3) {
+                    crsfClass.crsfPrepareCmdPacket(crsfCmdPacket, ELRS_BIND_COMMAND, ELRS_START_COMMAND);
+                    crsfClass.CrsfWritePacket(crsfCmdPacket, CRSF_CMD_PACKET_SIZE);
+                } else if (currentSetting == 4) {
+                    crsfClass.crsfPrepareCmdPacket(crsfCmdPacket, ELRS_WIFI_COMMAND, ELRS_START_COMMAND);
                     crsfClass.CrsfWritePacket(crsfCmdPacket, CRSF_CMD_PACKET_SIZE);
                 }
                 loopCount++;
-            } else if (loopCount > 505 && loopCount < 510) { // repeat 10 packets to avoid bad packet, change TX power level
-                if (currentSetting > 0) {
+            } else if (loopCount > 505 && loopCount <= 510) { // repeat 5 packets to avoid bad packet, change TX power level
+                if (currentSetting == 1 || currentSetting == 2) {
                     crsfClass.crsfPrepareCmdPacket(crsfCmdPacket, ELRS_POWER_COMMAND, currentPower);
-                    // buildElrsPacket(crsfCmdPacket,ELRS_WIFI_COMMAND,0x01);
+                    crsfClass.CrsfWritePacket(crsfCmdPacket, CRSF_CMD_PACKET_SIZE);
+                }
+                loopCount++;
+            } else if (loopCount > 510 && loopCount <= 515) { // repeat 5 packets to avoid bad packet, change TX dynamic power setting
+                if (currentSetting == 1 || currentSetting == 2) {
+                    crsfClass.crsfPrepareCmdPacket(crsfCmdPacket, ELRS_DYNAMIC_POWER_COMMAND, currentDynamic);
                     crsfClass.CrsfWritePacket(crsfCmdPacket, CRSF_CMD_PACKET_SIZE);
                 }
                 loopCount++;
             } else {
                 crsfClass.crsfPrepareDataPacket(crsfPacket, rcChannels);
                 crsfClass.CrsfWritePacket(crsfPacket, CRSF_PACKET_SIZE);
-
             }
+            
         #endif
         crsfTime = currentMicros + CRSF_TIME_BETWEEN_FRAMES_US;
     }
