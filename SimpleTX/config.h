@@ -48,17 +48,17 @@ int Rudder_OFFSET     = 2;
 
 // Define Reverse 1=reverse
 int Is_Aileron_Reverse  =0;
-int Is_Elevator_Reverse =1;
-int Is_Throttle_Reverse =1;
-int Is_Rudder_Reverse   =1;
+int Is_Elevator_Reverse =0;
+int Is_Throttle_Reverse =0;
+int Is_Rudder_Reverse   =0;
 
 // IO setup
 // pins that used for the Joystick
-const int analogInPinAileron = A3;
-const int analogInPinElevator = A4;
-const int analogInPinThrottle = A2;
-const int analogInPinRudder = A1;
-const int VOLTAGE_READ_PIN = A0;
+const int analogInPinAileron = A2;
+const int analogInPinElevator = A3;
+const int analogInPinThrottle = A1;
+const int analogInPinRudder = A0;
+const int VOLTAGE_READ_PIN = A7;
 
 // pins that used for the switch
 const int DIGITAL_PIN_SWITCH_ARM = 4;  // Arm switch
@@ -71,7 +71,7 @@ const int DIGITAL_PIN_LED = 5;    // in pcb v0.9 led is reused from AUX4 (rememb
 //const int DIGITAL_PIN_BUZZER = 7; // do not use in pcb v0.9
 
 // pins that used for buzzer
-const int DIGITAL_PIN_BUZZER = 6;
+const int DIGITAL_PIN_BUZZER = 12;
 //----- Voltage monitoring -------------------------
 // Define battery warning voltage
 const float WARNING_VOLTAGE = 7.4; // 2S Lipo 3.7v per cell

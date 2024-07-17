@@ -589,7 +589,7 @@ void loop()
                 crsfClass.crsfPrepareDataPacket(crsfPacket, rcChannels);
                 crsfClass.CrsfWritePacket(crsfPacket, CRSF_PACKET_SIZE);
             }
-            
+
         #endif
         crsfTime = currentMicros + CRSF_TIME_BETWEEN_FRAMES_US;
     }
