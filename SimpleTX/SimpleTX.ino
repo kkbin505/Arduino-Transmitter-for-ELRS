@@ -23,6 +23,7 @@
  */
 
 #include <Arduino.h>
+#include <NonBlockingRtttl.h>
 #include "EEPROM.h"
 #include "config.h"
 #include "crsf.h"
@@ -138,10 +139,16 @@ void calibrationChirp(uint8_t times) {
     delay(1000);
 
     for (uint8_t i = 0; i < times; i++) {
+#ifdef ACTIVE_BUZZER
         digitalWrite(DIGITAL_PIN_BUZZER, HIGH);
+#else
+        tone(DIGITAL_PIN_BUZZER,5000,100);
+#endif
         digitalWrite(DIGITAL_PIN_LED, HIGH);
         delay(100);
+#ifdef ACTIVE_BUZZER
         digitalWrite(DIGITAL_PIN_BUZZER, LOW);
+#endif
         digitalWrite(DIGITAL_PIN_LED, LOW);
         delay(100);
     }
@@ -383,8 +390,13 @@ void setup()
     pinMode(DIGITAL_PIN_SWITCH_AUX3, INPUT_PULLUP);
     // pinMode(DIGITAL_PIN_SWITCH_AUX4, INPUT_PULLUP);
     pinMode(DIGITAL_PIN_LED, OUTPUT);    // LED
-    pinMode(DIGITAL_PIN_BUZZER, OUTPUT); // LED
-    // digitalWrite(DIGITAL_PIN_BUZZER, LOW);
+    pinMode(DIGITAL_PIN_BUZZER, OUTPUT); // BUZZER
+#ifdef PASSIVE_BUZZER
+    digitalWrite(DIGITAL_PIN_BUZZER, LOW); // BUZZER OFF
+    if(STARTUP_MELODY!=""){
+      rtttl::begin(DIGITAL_PIN_BUZZER, STARTUP_MELODY);
+    }
+#endif
     // inialize voltage:
     batteryVoltage = 0.0;
 #ifdef PPMOUTPUT
@@ -400,7 +412,20 @@ void setup()
     sei();
 #endif
 
+#ifdef PASSIVE_BUZZER
+    if(STARTUP_MELODY!="") {
+      while( !rtttl::done() ) {
+        rtttl::play();
+      }
+    }
+    else {
+     delay(2000); // Give enough time for uploading firmware (2 seconds)     
+    }
+#else  
+    // passive buzzer, no startup tone
     delay(2000); // Give enough time for uploading firmware (2 seconds)
+    // digitalWrite(DIGITAL_PIN_BUZZER, HIGH); //BUZZER OFF
+#endif
 
     #ifdef DEBUG
         Serial.begin(115200);
@@ -417,26 +442,30 @@ void setup()
     #endif
 
     digitalWrite(DIGITAL_PIN_LED, HIGH); // LED ON
-    //digitalWrite(DIGITAL_PIN_BUZZER, HIGH); // BUZZER OFF
-
+    
     //calibrationReset();
     calibrationLoad();
-
 }
 
 void loop()
 {
+    // melody player needs to be first in the loop in order to play correctly.
+    rtttl::play();
+
     #ifdef GIMBAL_CALIBRATION
         if(calStatus ){
             calibrationRun(AUX1_Arm, AUX2_value);
         }
     #endif
-
     uint32_t currentMicros = micros();
 
     // Read Voltage
-    batteryVoltage = analogRead(VOLTAGE_READ_PIN) / 103.0f; // 98.5
-
+    batteryVoltage = analogRead(VOLTAGE_READ_PIN) / VOLTAGE_SCALE; // 98.5
+#ifdef DEBUG
+    Serial.print("batteryVoltage:");
+    Serial.print(batteryVoltage);
+    Serial.print("v ");
+#endif
     if (batteryVoltage < WARNING_VOLTAGE && batteryVoltage >= BEEPING_VOLTAGE) {
         blinkLED(DIGITAL_PIN_LED, 500);
     }else if(batteryVoltage < BEEPING_VOLTAGE && batteryVoltage >= ON_USB){
@@ -452,6 +481,13 @@ void loop()
         blinkLED(DIGITAL_PIN_LED, 100);
         playingTones(5);
     }
+#ifdef PASSIVE_BUZZER
+    else { // Stop the stick warning tone if you move the sticks
+      if ( rtttl::isPlaying() ) {
+        rtttl::stop();
+      }
+    }
+#endif
 
     /*
      * Handle analog input
@@ -550,8 +586,7 @@ void loop()
         Serial.print(stickMoved);
         Serial.print(" previous_throttle:");
         Serial.print(previous_throttle);
-        Serial.println();
-
+        Serial.println(); 
         #else
             if (loopCount <= 500) { // repeat 500 packets to build connection to TX module
                 // Build commond packet

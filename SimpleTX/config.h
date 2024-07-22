@@ -47,7 +47,7 @@ int Rudder_OFFSET     = 2;
 #endif
 
 // Define Reverse 1=reverse
-int Is_Aileron_Reverse  =0;
+int Is_Aileron_Reverse  =1;
 int Is_Elevator_Reverse =0;
 int Is_Throttle_Reverse =0;
 int Is_Rudder_Reverse   =0;
@@ -67,13 +67,23 @@ const int DIGITAL_PIN_SWITCH_AUX3 = 2;  //
 // const int DIGITAL_PIN_SWITCH_AUX4 = 5;  //
 
 // pins that used for output
-const int DIGITAL_PIN_LED = 5;    // in pcb v0.9 led is reused from AUX4 (remember to add 300om resistor in led)
-//const int DIGITAL_PIN_BUZZER = 7; // do not use in pcb v0.9
+const int DIGITAL_PIN_LED = 5;  
 
 // pins that used for buzzer
+//#define ACTIVE_BUZZER
+#define PASSIVE_BUZZER
 const int DIGITAL_PIN_BUZZER = 12;
+
+// If using a passive buzzer, you can enjoy an RTTTL melody on startup (set to "" to disable)
+// if using other melodies from bluejay etc. note that the first three parameters need to be in this order:
+// d=,o=,b= (bluejay melodies are often in different order)
+#ifdef PASSIVE_BUZZER
+const char * STARTUP_MELODY = "Melody:d=32,o=4,b=570:4b,p,4e5,p,4b,p,4f#5,2p,4e5,2b5,8b5,1p,8e4,2p,8f#5";
+const char * STICK_MOVE_WARNING ="tetris:d=4,o=5,b=160:e6,8b,8c6,8d6,16e6,16d6,8c6,8b,a,8a,8c6,e6,8d6,8c6,b,8b,8c6,d6,e6,c6,a,2a,8p,d6,8f6,a6,8g6,8f6,e6,8e6,8c6,e6,8d6,8c6,b,8b,8c6,d6,e6,c6,a,a";
+#endif
 //----- Voltage monitoring -------------------------
 // Define battery warning voltage
+const float VOLTAGE_SCALE = 111.0;
 const float WARNING_VOLTAGE = 7.4; // 2S Lipo 3.7v per cell
 const float BEEPING_VOLTAGE = 7.0; // 2S Lipo 3.5v per cell
 const float ON_USB = 5.2;          // On USB power / no battery
