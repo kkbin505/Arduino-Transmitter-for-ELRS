@@ -388,7 +388,9 @@ void setup()
     pinMode(DIGITAL_PIN_SWITCH_ARM, INPUT_PULLUP);
     pinMode(DIGITAL_PIN_SWITCH_AUX2, INPUT_PULLUP);
     pinMode(DIGITAL_PIN_SWITCH_AUX3, INPUT_PULLUP);
-    // pinMode(DIGITAL_PIN_SWITCH_AUX4, INPUT_PULLUP);
+    if (DIGITAL_PIN_SWITCH_AUX4 != 0){
+      pinMode(DIGITAL_PIN_SWITCH_AUX4, INPUT_PULLUP);
+    }
     pinMode(DIGITAL_PIN_LED, OUTPUT);    // LED
     pinMode(DIGITAL_PIN_BUZZER, OUTPUT); // BUZZER
 #ifdef PASSIVE_BUZZER
@@ -552,16 +554,22 @@ void loop()
      * Handel digital input
      */
     AUX1_Arm = digitalRead(DIGITAL_PIN_SWITCH_ARM);
+    if (Is_Rudder_Reverse == 1) {
+      AUX1_Arm = ~AUX1_Arm;
+    }
     AUX2_value = digitalRead(DIGITAL_PIN_SWITCH_AUX2);
     AUX3_value = digitalRead(DIGITAL_PIN_SWITCH_AUX3);
-    // AUX4_value = digitalRead(DIGITAL_PIN_SWITCH_AUX4);// reuse for LED
-
+    if (DIGITAL_PIN_SWITCH_AUX4 != 0){
+      AUX4_value = digitalRead(DIGITAL_PIN_SWITCH_AUX4);// reuse for LED
+    }
+    
     // Aux Channels
     rcChannels[AUX1] = (AUX1_Arm == 1)   ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
     rcChannels[AUX2] = (AUX2_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
     rcChannels[AUX3] = (AUX3_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-    // rcChannels[AUX4] = (AUX4_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-
+    if (DIGITAL_PIN_SWITCH_AUX4 != 0){
+      rcChannels[AUX4] = (AUX4_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+    }
     if(stickInt=0){
         previous_throttle=rcChannels[THROTTLE];
         stickInt=1;

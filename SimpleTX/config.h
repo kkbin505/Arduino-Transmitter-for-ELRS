@@ -40,10 +40,10 @@ int Throttle_OFFSET   = 0;
 int Rudder_OFFSET     = -18;
 #else
 // stat war
-int Aileron_OFFSET    = 4;
-int Elevator_OFFSET   = -8;
+int Aileron_OFFSET    = 0;
+int Elevator_OFFSET   = 0;
 int Throttle_OFFSET   = 0;
-int Rudder_OFFSET     = 2;
+int Rudder_OFFSET     = 0;
 #endif
 
 // Define Reverse 1=reverse
@@ -51,6 +51,7 @@ int Is_Aileron_Reverse  =1;
 int Is_Elevator_Reverse =0;
 int Is_Throttle_Reverse =0;
 int Is_Rudder_Reverse   =0;
+int Is_Arm_Reverse   =0;
 
 // IO setup
 // pins that used for the Joystick
@@ -64,7 +65,7 @@ const int VOLTAGE_READ_PIN = A7;
 const int DIGITAL_PIN_SWITCH_ARM = 4;  // Arm switch
 const int DIGITAL_PIN_SWITCH_AUX2 = 3; //
 const int DIGITAL_PIN_SWITCH_AUX3 = 2;  //
-// const int DIGITAL_PIN_SWITCH_AUX4 = 5;  //
+const int DIGITAL_PIN_SWITCH_AUX4 = 0;  // Set to 0 to disable this input
 
 // pins that used for output
 const int DIGITAL_PIN_LED = 5;  
