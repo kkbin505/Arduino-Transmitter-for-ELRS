@@ -560,13 +560,18 @@ void loop()
     AUX2_value = digitalRead(DIGITAL_PIN_SWITCH_AUX2);
     AUX3_value = digitalRead(DIGITAL_PIN_SWITCH_AUX3);
     if (DIGITAL_PIN_SWITCH_AUX4 != 0){
-      AUX4_value = digitalRead(DIGITAL_PIN_SWITCH_AUX4);// reuse for LED
+      AUX4_value = digitalRead(DIGITAL_PIN_SWITCH_AUX4);
     }
     
     // Aux Channels
     rcChannels[AUX1] = (AUX1_Arm == 1)   ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-    rcChannels[AUX2] = (AUX2_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-    rcChannels[AUX3] = (AUX3_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+    #ifdef USE_3POS_SWITCH_AS_1_CHANNEL
+      rcChannels[AUX2] = (AUX2_value == 1) ? (CRSF_DIGITAL_CHANNEL_MIN+CRSF_DIGITAL_CHANNEL_MAX)/2 : CRSF_DIGITAL_CHANNEL_MIN;
+      rcChannels[AUX2] = (AUX3_value == 1) ? rcChannels[AUX2] : CRSF_DIGITAL_CHANNEL_MAX;
+    #else
+      rcChannels[AUX2] = (AUX2_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+      rcChannels[AUX3] = (AUX3_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+    #endif
     if (DIGITAL_PIN_SWITCH_AUX4 != 0){
       rcChannels[AUX4] = (AUX4_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
     }

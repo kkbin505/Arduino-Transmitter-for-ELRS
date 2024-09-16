@@ -65,12 +65,16 @@ const int VOLTAGE_READ_PIN = A7;
 const int DIGITAL_PIN_SWITCH_ARM = 4;  // Arm switch
 const int DIGITAL_PIN_SWITCH_AUX2 = 3; //
 const int DIGITAL_PIN_SWITCH_AUX3 = 2;  //
+// If the following line is uncommented, the 3 position switch will send low/mid/high on channel 6
+// Alternatively it will send one position as Ch6 high, middle as nothing, 3rd position as ch7 high
+//#define USE_3POS_SWITCH_AS_1_CHANNEL 
 const int DIGITAL_PIN_SWITCH_AUX4 = 0;  // Set to 0 to disable this input
 
 // pins that used for output
 const int DIGITAL_PIN_LED = 5;  
 
 // pins that used for buzzer
+// Active buzzer only plays one tone (often used on Flight controllers as a beeper)
 //#define ACTIVE_BUZZER
 #define PASSIVE_BUZZER
 const int DIGITAL_PIN_BUZZER = 12;
