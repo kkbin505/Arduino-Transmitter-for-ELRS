@@ -561,6 +561,8 @@ void loop()
     AUX3_value = digitalRead(DIGITAL_PIN_SWITCH_AUX3);
     if (DIGITAL_PIN_SWITCH_AUX4 != 0){
       AUX4_value = digitalRead(DIGITAL_PIN_SWITCH_AUX4);
+    }else {
+        AUX4_value = 0
     }
     
     // Aux Channels

@@ -55,11 +55,11 @@ int Is_Arm_Reverse   =0;
 
 // IO setup
 // pins that used for the Joystick
-const int analogInPinAileron = A2;
+const int analogInPinAileron = A4;
 const int analogInPinElevator = A3;
-const int analogInPinThrottle = A1;
-const int analogInPinRudder = A0;
-const int VOLTAGE_READ_PIN = A7;
+const int analogInPinThrottle = A2;
+const int analogInPinRudder = A1;
+const int VOLTAGE_READ_PIN = A0;
 
 // pins that used for the switch
 const int DIGITAL_PIN_SWITCH_ARM = 4;  // Arm switch
@@ -77,7 +77,7 @@ const int DIGITAL_PIN_LED = 5;
 // Active buzzer only plays one tone (often used on Flight controllers as a beeper)
 //#define ACTIVE_BUZZER
 #define PASSIVE_BUZZER
-const int DIGITAL_PIN_BUZZER = 12;
+const int DIGITAL_PIN_BUZZER = 6;
 
 // If using a passive buzzer, you can enjoy an RTTTL melody on startup (set to "" to disable)
 // if using other melodies from bluejay etc. note that the first three parameters need to be in this order:
@@ -124,7 +124,7 @@ const float ON_USB = 5.2;          // On USB power / no battery
 
 // 3 Default Settings
 #define SETTING_1_PktRate 3 // 250Hz (-108dB)
-#define SETTING_1_Power 3   // 100mW
+#define SETTING_1_Power 1   // 25mW
 #define SETTING_1_Dynamic 1 // Dynamic power on
 
 #define SETTING_2_PktRate 0 // 50Hz (-115dB)
