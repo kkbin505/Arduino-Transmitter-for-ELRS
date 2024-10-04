@@ -29,6 +29,13 @@ It was tested for ELRS 1.0 and 2.0.
 
 ### Update:
 
+### 2024/10/4 testing ELRS 3.0 support 
+
+Thanks to the great joby done by Tokyo_Dom, now I am testing ELRS 3.0 support. Will release soon.
+
+https://github.com/dbloemhard/Arduino-Transmitter-for-ELRS3.x
+
+
 ### The development was moved to VS code 
 
 ### 2022/11/5 Move IDE to VSCODE and Arduino Extension
