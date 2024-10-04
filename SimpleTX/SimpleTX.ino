@@ -562,7 +562,7 @@ void loop()
     if (DIGITAL_PIN_SWITCH_AUX4 != 0){
       AUX4_value = digitalRead(DIGITAL_PIN_SWITCH_AUX4);
     }else {
-        AUX4_value = 0
+        AUX4_value = 0;
     }
     
     // Aux Channels
