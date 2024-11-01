@@ -22,14 +22,14 @@
  Simple TX CONFIG OPTIONS (comment out unneeded options)
  =======================================================================================================
  */
-// Define analogy input limite
+// Define analogy input limite, arduino analogy input is 10 bit, so the max range is from 0 to 1023.
 
 #define ADC_MIN 0
 #define ADC_MID 511
 #define ADC_MAX 1023
 
 
-#define ANALOG_CUTOFF 150 // cut off lower and upper end to avoid un-symmetric joystick range in trade off resolution
+#define ANALOG_CUTOFF 150 // cut off lower and upper end to avoid un-symmetric joystick range in trade off of resolution
 
 // Define RC input Offset
 #ifdef USE_M7
@@ -53,7 +53,7 @@ int Is_Throttle_Reverse =0;
 int Is_Rudder_Reverse   =0;
 
 // IO setup
-// pins that used for the Joystick
+// pins that are used for the Joystick
 const int analogInPinAileron = A4;
 const int analogInPinElevator = A3;
 const int analogInPinThrottle = A2;
@@ -61,27 +61,26 @@ const int analogInPinRudder = A1;
 const int VOLTAGE_READ_PIN = A0;
 
 // pins that used for the switch
-const int DIGITAL_PIN_SWITCH_ARM = 4;  // Arm switch
-const int DIGITAL_PIN_SWITCH_AUX2 = 3; //
+const int DIGITAL_PIN_SWITCH_ARM = 4;  // default arm switch for Elrs is channel 5 (digital 1)
+const int DIGITAL_PIN_SWITCH_AUX2_HIGH = 3; // 3 stage switch for mode setup
+const int DIGITAL_PIN_SWITCH_AUX2_LOW = 8; //
 const int DIGITAL_PIN_SWITCH_AUX3 = 2;  //
-// const int DIGITAL_PIN_SWITCH_AUX4 = 5;  //
+const int DIGITAL_PIN_SWITCH_AUX4 = 5;  //
 
 // pins that used for output
-const int DIGITAL_PIN_LED = 5;    // in pcb v0.9 led is reused from AUX4 (remember to add 300om resistor in led)
-//const int DIGITAL_PIN_BUZZER = 7; // do not use in pcb v0.9
-
+const int DIGITAL_PIN_LED = 7;    // in pcb v0.9 led is reused from AUX4 (remember to add 300om resistor between led and 5 digital output)
 // pins that used for buzzer
 const int DIGITAL_PIN_BUZZER = 6;
 //----- Voltage monitoring -------------------------
 // Define battery warning voltage
 const float WARNING_VOLTAGE = 7.4; // 2S Lipo 3.7v per cell
-const float BEEPING_VOLTAGE = 7.0; // 2S Lipo 3.5v per cell
+const float BEEPING_VOLTAGE = 6.6; // 2S Lipo 3.3v per cell
 
 // Define Commond for start Up Setting
 #define RC_MIN_COMMAND 600
 #define RC_MAX_COMMAND 1400
 
-// Define stick unmove alarm time
+// Define stick unmovement alarm time in ms (5 minutes)
 #define STICK_ALARM_TIME 30000
 
 // from https://github.com/DeviationTX/deviation/pull/1009/ ELRS menu implement in deviation TX

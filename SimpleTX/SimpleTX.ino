@@ -40,8 +40,9 @@ int previous_throttle = 191;
 
 int loopCount = 0; // for ELRS seeting
 
-int AUX1_Arm = 0; // switch values read from the digital pin
-int AUX2_value = 0;
+int AUX1_Arm = 0; // switch values read from the digital pin, default = 0
+int AUX2_value_HIGH= 0;
+int AUX2_value_LOW = 0;
 int AUX3_value = 0;
 int AUX4_value = 0;
 
@@ -211,15 +212,15 @@ bool calibrationProcess() {
     currentMillis = millis();
 
     if (currentMillis <CALIB_CENT_TMO){
-        // A Center
+        // Aileron Center
         int val = analogRead(analogInPinAileron);
         calValues.aileronCenter = val;
         
-        // E Center
+        // Elevator Center
         val = analogRead(analogInPinElevator);
         calValues.elevatorCenter = val;
 
-        // R Center
+        // Rudder  Center
         val = analogRead(analogInPinRudder);
         calValues.rudderCenter = val;
     
@@ -233,7 +234,7 @@ bool calibrationProcess() {
         Serial.println();
         
     }
-    // 15 seconds for moving sticks
+    // 15 seconds for moving sticks to the max range to calibrate the end analogy vaule of joysticks
     else if (currentMillis > CALIB_CENT_TMO && currentMillis < CALIB_TMO){
     //while ((calibrationTimerStart + CALIB_TMO ) < millis()) {
         // A Min-Max
@@ -344,7 +345,7 @@ void selectSetting() {
 }
 
 bool checkStickMove(){
-    // check if stick moved, warring after 10 minutes
+    // check if stick moved, if movement is less than 30(vaule), the vaule is false
     if(abs(previous_throttle - rcChannels[THROTTLE]) < 30){
         stickMoved = 0;
         //Serial.println(abs(previous_throttle - rcChannels[THROTTLE]));
@@ -353,7 +354,7 @@ bool checkStickMove(){
         stickMovedMillis = millis();
         stickMoved = 1;
     }
-
+    //count unmovement time
     if (millis() - stickMovedMillis > STICK_ALARM_TIME){
        // Serial.println((millis() - stickMovedMillis));
         return true;
@@ -371,7 +372,8 @@ void setup()
 
     analogReference(EXTERNAL);
     pinMode(DIGITAL_PIN_SWITCH_ARM, INPUT_PULLUP);
-    pinMode(DIGITAL_PIN_SWITCH_AUX2, INPUT_PULLUP);
+    pinMode(DIGITAL_PIN_SWITCH_AUX2_HIGH, INPUT_PULLUP);
+    pinMode(DIGITAL_PIN_SWITCH_AUX2_LOW, INPUT_PULLUP);
     pinMode(DIGITAL_PIN_SWITCH_AUX3, INPUT_PULLUP);
     // pinMode(DIGITAL_PIN_SWITCH_AUX4, INPUT_PULLUP);
     pinMode(DIGITAL_PIN_LED, OUTPUT);    // LED
@@ -504,15 +506,22 @@ void loop()
      * Handel digital input
      */
     AUX1_Arm = digitalRead(DIGITAL_PIN_SWITCH_ARM);
-    AUX2_value = digitalRead(DIGITAL_PIN_SWITCH_AUX2);
+    AUX2_value_HIGH= digitalRead(DIGITAL_PIN_SWITCH_AUX2_HIGH);
+    AUX2_value_LOW = digitalRead(DIGITAL_PIN_SWITCH_AUX2_LOW);
     AUX3_value = digitalRead(DIGITAL_PIN_SWITCH_AUX3);
-    // AUX4_value = digitalRead(DIGITAL_PIN_SWITCH_AUX4);// reuse for LED
+    AUX4_value = digitalRead(DIGITAL_PIN_SWITCH_AUX4);
 
     // Aux Channels
     rcChannels[AUX1] = (AUX1_Arm == 1)   ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-    rcChannels[AUX2] = (AUX2_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+    if (AUX2_value_HIGH== 1){
+      rcChannels[AUX3] = CRSF_DIGITAL_CHANNEL_MIN;
+    }else if( AUX2_value_LOW ==1){
+      rcChannels[AUX3] = CRSF_DIGITAL_CHANNEL_MAX;
+    }else{
+      rcChannels[AUX3] = CRSF_DIGITAL_CHANNEL_MID;
+    }
     rcChannels[AUX3] = (AUX3_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-    // rcChannels[AUX4] = (AUX4_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+    rcChannels[AUX4] = (AUX4_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
 
     if(stickInt=0){
         previous_throttle=rcChannels[THROTTLE];
