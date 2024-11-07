@@ -35,16 +35,25 @@ Because I have started flying fixed wing with iNav, the current 7 channels is no
 The current digital pin:
 
 D2 - AUX3 (channel 6)
+
 D3 - AUX2 low
+
 D8 - AUX2 high
+
 D4 - AUX1
+
 D5 - AUX4
+
 D6 - BUZZER
+
 D7 - LED
 
 3 stage Switch:
+
 Low - D3
+
 Mid - GND
+
 High - D8 
 
 ### The development was moved to VS code 
