@@ -29,6 +29,24 @@ It was tested for ELRS 1.0 and 2.0.
 
 ### Update:
 
+### 2024/11/7 add 3 stage AUX channel
+In branch 2.X maintance:
+Because I have started flying fixed wing with iNav, the current 7 channels is not enougth. So I add 1 aux channel, channel 8 and changed channel 6 (AUX2) from 2 stage switch to 3 stage. This is also for iNav.
+The current digital pin:
+
+D2 - AUX3 (channel 6)
+D3 - AUX2 low
+D8 - AUX2 high
+D4 - AUX1
+D5 - AUX4
+D6 - BUZZER
+D7 - LED
+
+3 stage Switch:
+Low - D3
+Mid - GND
+High - D8 
+
 ### The development was moved to VS code 
 
 ### 2022/11/5 Move IDE to VSCODE and Arduino Extension
