@@ -513,13 +513,9 @@ void loop()
 
     // Aux Channels
     rcChannels[AUX1] = (AUX1_Arm == 1)   ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-    if (AUX2_value_HIGH== 0){
-      rcChannels[AUX2] = CRSF_DIGITAL_CHANNEL_MIN;
-    }else if( AUX2_value_LOW == 0){
-      rcChannels[AUX2] = CRSF_DIGITAL_CHANNEL_MAX;
-    }else{
-      rcChannels[AUX2] = CRSF_DIGITAL_CHANNEL_MID;
-    }
+    rcChannels[AUX2] = (AUX2_value_HIGH == 0) ? CRSF_DIGITAL_CHANNEL_MAX :
+                       (AUX2_value_LOW == 0) ? CRSF_DIGITAL_CHANNEL_MIN :
+                        CRSF_DIGITAL_CHANNEL_MID;
     rcChannels[AUX3] = (AUX3_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
     rcChannels[AUX4] = (AUX4_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
 
