@@ -62,8 +62,8 @@ const int VOLTAGE_READ_PIN = A0;
 
 // pins that used for the switch
 const int DIGITAL_PIN_SWITCH_ARM = 4;  // default arm switch for Elrs is channel 5 (digital 1)
-const int DIGITAL_PIN_SWITCH_AUX2_HIGH = 3; // 3 stage switch for mode setup
-const int DIGITAL_PIN_SWITCH_AUX2_LOW = 8; //
+const int DIGITAL_PIN_SWITCH_AUX2_HIGH = 8; // 3 stage switch for mode setup
+const int DIGITAL_PIN_SWITCH_AUX2_LOW = 3; //
 const int DIGITAL_PIN_SWITCH_AUX3 = 2;  //
 const int DIGITAL_PIN_SWITCH_AUX4 = 5;  //
 
@@ -81,7 +81,7 @@ const float BEEPING_VOLTAGE = 6.6; // 2S Lipo 3.3v per cell
 #define RC_MAX_COMMAND 1400
 
 // Define stick unmovement alarm time in ms (5 minutes)
-#define STICK_ALARM_TIME 30000
+#define STICK_ALARM_TIME 300000
 
 // from https://github.com/DeviationTX/deviation/pull/1009/ ELRS menu implement in deviation TX
 /*static uint8_t  currentPktRate =1; //  "250Hz", "150Hz", "50Hz"

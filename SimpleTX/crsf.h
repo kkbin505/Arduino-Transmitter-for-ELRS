@@ -28,7 +28,7 @@
 
 // Define AUX channel input limite
 #define CRSF_DIGITAL_CHANNEL_MIN 172
-#define CRSF_DIGITAL_CHANNEL_MID 1500
+#define CRSF_DIGITAL_CHANNEL_MID 1000
 #define CRSF_DIGITAL_CHANNEL_MAX 1811
 
 // internal crsf variables

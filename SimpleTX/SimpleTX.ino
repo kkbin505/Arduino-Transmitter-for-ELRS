@@ -375,7 +375,7 @@ void setup()
     pinMode(DIGITAL_PIN_SWITCH_AUX2_HIGH, INPUT_PULLUP);
     pinMode(DIGITAL_PIN_SWITCH_AUX2_LOW, INPUT_PULLUP);
     pinMode(DIGITAL_PIN_SWITCH_AUX3, INPUT_PULLUP);
-    // pinMode(DIGITAL_PIN_SWITCH_AUX4, INPUT_PULLUP);
+    pinMode(DIGITAL_PIN_SWITCH_AUX4, INPUT_PULLUP);
     pinMode(DIGITAL_PIN_LED, OUTPUT);    // LED
     pinMode(DIGITAL_PIN_BUZZER, OUTPUT); // LED
     // digitalWrite(DIGITAL_PIN_BUZZER, LOW);
@@ -513,15 +513,15 @@ void loop()
 
     // Aux Channels
     rcChannels[AUX1] = (AUX1_Arm == 1)   ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-    if (AUX2_value_HIGH== 1){
-      rcChannels[AUX3] = CRSF_DIGITAL_CHANNEL_MIN;
-    }else if( AUX2_value_LOW ==1){
-      rcChannels[AUX3] = CRSF_DIGITAL_CHANNEL_MAX;
+    if (AUX2_value_HIGH== 0){
+      rcChannels[AUX2] = CRSF_DIGITAL_CHANNEL_MIN;
+    }else if( AUX2_value_LOW == 0){
+      rcChannels[AUX2] = CRSF_DIGITAL_CHANNEL_MAX;
     }else{
-      rcChannels[AUX3] = CRSF_DIGITAL_CHANNEL_MID;
+      rcChannels[AUX2] = CRSF_DIGITAL_CHANNEL_MID;
     }
     rcChannels[AUX3] = (AUX3_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-    rcChannels[AUX4] = (AUX4_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+    rcChannels[AUX4] = (AUX4_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
 
     if(stickInt=0){
         previous_throttle=rcChannels[THROTTLE];
