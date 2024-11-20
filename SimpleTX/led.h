@@ -27,3 +27,7 @@ void blinkLED(int ledPin, uint16_t blinkRate) {
         digitalWrite(ledPin, ledState);
     }
 }
+
+void tunOnLED(int ledPin){
+    digitalWrite(ledPin, HIGH);
+}

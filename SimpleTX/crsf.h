@@ -48,14 +48,16 @@
 
 // ELRS command
 #define ELRS_ADDRESS                    0xEE
-#define ELRS_BIND_COMMAND               0xFF
-#define ELRS_WIFI_COMMAND               0xFE
 #define ELRS_PKT_RATE_COMMAND           0x01
 #define ELRS_TLM_RATIO_COMMAND          0x02
 #define ELRS_SWITCH_MODE_COMMAND        0x03
 #define ELRS_MODEL_MATCH_COMMAND        0x04
 #define ELRS_POWER_COMMAND              0x06
-#define ELRS_BLE_JOYSTIC_COMMAND        17
+#define ELRS_DYNAMIC_POWER_COMMAND      0x07
+#define ELRS_BLE_JOYSTIC_COMMAND        0x11
+#define ELRS_WIFI_COMMAND               0x0F
+#define ELRS_BIND_COMMAND               0x11
+#define ELRS_START_COMMAND              0x04
 #define TYPE_SETTINGS_WRITE             0x2D
 #define ADDR_RADIO                      0xEA //  Radio Transmitter
 #define port                            Serial
@@ -68,7 +70,7 @@ public:
     void CrsfWritePacket(uint8_t packet[], uint8_t packetLength);
 };
 
-/* ESP32 Team900
+/* ESP32 Team900 ELRS 2.X
 https://github.com/danxdz/simpleTx_esp32/blob/master/src/Simple_TX.ino
         // buildElrsPacket(crsfCmdPacket,X,3);
         // 0 : ELRS status request => ??
@@ -94,3 +96,4 @@ https://github.com/danxdz/simpleTx_esp32/blob/master/src/Simple_TX.ino
         // 19: Set Lua [Bad/Good]=0
         // 20: Set Lua [2.1.0 EU868]=0 =1 ?? get
 */
+
