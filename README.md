@@ -31,10 +31,11 @@ It was tested for ELRS 1.0 and 2.0.
 
 ### 2024/11/7 add 3 stage AUX channel
 In branch 2.X maintance:
-Because I have started flying fixed wing with iNav, the current 7 channels is not enougth. So I add 1 aux channel, channel 8 and changed channel 6 (AUX2) from 2 stage switch to 3 stage. This is also for iNav.
+Because I have started flying fixed wing with iNav, current 7 channels are not enougth. So I added channel 8 and changed channel 6 (AUX2) from 2 postion switch to 3 postion. This is also for Betaflight. The 3 postion have to use 2 digital pins, currently I am using D3 and D8.
+
 The current digital pin:
 
-D2 - AUX3 (channel 6)
+D2 - AUX3 
 
 D3 - AUX2 low
 
@@ -48,13 +49,6 @@ D6 - BUZZER
 
 D7 - LED
 
-3 stage Switch:
-
-Low - D3
-
-Mid - GND
-
-High - D8 
 
 ### The development was moved to VS code 
 
