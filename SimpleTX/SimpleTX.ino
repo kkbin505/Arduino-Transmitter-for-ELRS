@@ -42,7 +42,8 @@ int previous_throttle = 191;
 int loopCount = 0; // for ELRS seeting
 
 int AUX1_Arm = 0; // switch values read from the digital pin
-int AUX2_value = 0;
+int AUX2_value_LOW = 0;
+int AUX2_value_HIGH = 0;
 int AUX3_value = 0;
 int AUX4_value = 0;
 
@@ -386,7 +387,8 @@ void setup()
 
     analogReference(EXTERNAL);
     pinMode(DIGITAL_PIN_SWITCH_ARM, INPUT_PULLUP);
-    pinMode(DIGITAL_PIN_SWITCH_AUX2, INPUT_PULLUP);
+    pinMode(DIGITAL_PIN_SWITCH_AUX2_HIGH, INPUT_PULLUP);
+    pinMode(DIGITAL_PIN_SWITCH_AUX2_LOW, INPUT_PULLUP);
     pinMode(DIGITAL_PIN_SWITCH_AUX3, INPUT_PULLUP);
     if (DIGITAL_PIN_SWITCH_AUX4 != 0){
       pinMode(DIGITAL_PIN_SWITCH_AUX4, INPUT_PULLUP);
@@ -557,7 +559,16 @@ void loop()
     if (Is_Rudder_Reverse == 1) {
       AUX1_Arm = ~AUX1_Arm;
     }
-    AUX2_value = digitalRead(DIGITAL_PIN_SWITCH_AUX2);
+    AUX2_value_LOW = digitalRead(DIGITAL_PIN_SWITCH_AUX2_LOW);
+    AUX2_value_HIGH = digitalRead(DIGITAL_PIN_SWITCH_AUX2_HIGH);
+
+    if (AUX2_value_HIGH== 0){
+        rcChannels[AUX2] = CRSF_DIGITAL_CHANNEL_MIN;
+      }else if( AUX2_value_LOW == 0){
+        rcChannels[AUX2] = CRSF_DIGITAL_CHANNEL_MAX;
+      }else{
+        rcChannels[AUX2] = CRSF_DIGITAL_CHANNEL_MID;
+      }
     AUX3_value = digitalRead(DIGITAL_PIN_SWITCH_AUX3);
     if (DIGITAL_PIN_SWITCH_AUX4 != 0){
       AUX4_value = digitalRead(DIGITAL_PIN_SWITCH_AUX4);
@@ -567,13 +578,7 @@ void loop()
     
     // Aux Channels
     rcChannels[AUX1] = (AUX1_Arm == 1)   ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-    #ifdef USE_3POS_SWITCH_AS_1_CHANNEL
-      rcChannels[AUX2] = (AUX2_value == 1) ? (CRSF_DIGITAL_CHANNEL_MIN+CRSF_DIGITAL_CHANNEL_MAX)/2 : CRSF_DIGITAL_CHANNEL_MIN;
-      rcChannels[AUX2] = (AUX3_value == 1) ? rcChannels[AUX2] : CRSF_DIGITAL_CHANNEL_MAX;
-    #else
-      rcChannels[AUX2] = (AUX2_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-      rcChannels[AUX3] = (AUX3_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-    #endif
+    rcChannels[AUX3] = (AUX3_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
     if (DIGITAL_PIN_SWITCH_AUX4 != 0){
       rcChannels[AUX4] = (AUX4_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
     }
