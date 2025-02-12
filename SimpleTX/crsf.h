@@ -68,6 +68,8 @@ public:
 };
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
 /* ESP32 Team900
 https://github.com/danxdz/simpleTx_esp32/blob/master/src/Simple_TX.ino
         // buildElrsPacket(crsfCmdPacket,X,3);
@@ -95,5 +97,9 @@ https://github.com/danxdz/simpleTx_esp32/blob/master/src/Simple_TX.ino
         // 20: Set Lua [2.1.0 EU868]=0 =1 ?? get
 */
 =======
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 
 >>>>>>> Stashed changes
