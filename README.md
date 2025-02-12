@@ -29,7 +29,12 @@ It was tested for ELRS 1.0 and 2.0.
 
 ### Update:
 
-### The development was moved to VS code 
+### 2025/2/12 Add support for ELRS 3.0
+Thanks to the great work doing by dbloemhard now the SimpleTX support 3.0, I merged the update into the main branch.
+You can change pocket rate, power and tune on/off dynamic power by gesutre.
+His repo:
+https://github.com/dbloemhard/Arduino-Transmitter-for-ELRS3.x
+
 
 ### 2022/11/5 Move IDE to VSCODE and Arduino Extension
 
