@@ -28,15 +28,15 @@
 
 // Define AUX channel input limite
 #define CRSF_DIGITAL_CHANNEL_MIN 172
-#define CRSF_DIGITAL_CHANNEL_MID 1000
 #define CRSF_DIGITAL_CHANNEL_MAX 1811
+#define CRSF_DIGITAL_CHANNEL_MID 992
 
 // internal crsf variables
 #define CRSF_TIME_NEEDED_PER_FRAME_US   1100 // 700 ms + 400 ms for potential ad-hoc request
-#define SERIAL_BAUDRATE                 115200 //low baud for Arduino Nano , the TX module will auto detect baud. 115200/400000
-#define CRSF_TIME_BETWEEN_FRAMES_US     4000 // 4 ms 250Hz
-//#define SERIAL_BAUDRATE                 400000
-//#define CRSF_TIME_BETWEEN_FRAMES_US     1666 // 1.6 ms 500Hz
+//#define SERIAL_BAUDRATE                 115200 //low baud for Arduino Nano , the TX module will auto detect baud. 115200/400000
+//#define CRSF_TIME_BETWEEN_FRAMES_US     4000 // 4 ms 250Hz
+#define SERIAL_BAUDRATE                 400000
+#define CRSF_TIME_BETWEEN_FRAMES_US     1666 // 1.6 ms up to 500Hz
 #define CRSF_PAYLOAD_OFFSET             offsetof(crsfFrameDef_t, type)
 #define CRSF_MSP_RX_BUF_SIZE            128
 #define CRSF_MSP_TX_BUF_SIZE            128
@@ -54,7 +54,7 @@
 #define ELRS_MODEL_MATCH_COMMAND        0x04
 #define ELRS_POWER_COMMAND              0x06
 #define ELRS_DYNAMIC_POWER_COMMAND      0x07
-//#define ELRS_BLE_JOYSTIC_COMMAND      0x11 //  Not on ESP8266
+#define ELRS_BLE_JOYSTIC_COMMAND        0x11
 #define ELRS_WIFI_COMMAND               0x0F
 #define ELRS_BIND_COMMAND               0x11
 #define ELRS_START_COMMAND              0x04

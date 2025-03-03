@@ -21,6 +21,22 @@ bool started=false;
 // ----------------------------------------------------------------------------
 void playingTones(uint8_t timeSeconde) {
     unsigned long currentMillis = millis();
+
+#ifdef ACTIVE_BUZZER
+    if (currentMillis - previousToneMillis <= timeSeconde*100) {
+      digitalWrite(DIGITAL_PIN_BUZZER, LOW);
+    }else if(currentMillis - previousToneMillis > timeSeconde*100 && currentMillis - previousToneMillis <= timeSeconde*200){
+      digitalWrite(DIGITAL_PIN_BUZZER, HIGH);
+    }else if(currentMillis - previousToneMillis > timeSeconde*200 && currentMillis - previousToneMillis <= timeSeconde*300){
+      digitalWrite(DIGITAL_PIN_BUZZER, LOW);
+    }else if(currentMillis - previousToneMillis > timeSeconde*300 && currentMillis - previousToneMillis <= 5000){
+      digitalWrite(DIGITAL_PIN_BUZZER, HIGH);
+    }else{
+        previousToneMillis = currentMillis;     // save the last time buzzer play tone
+        digitalWrite(DIGITAL_PIN_BUZZER, 0);
+    }
+#endif
+
 #ifdef PASSIVE_BUZZER
     if ( !rtttl::isPlaying()) {
       if ( !started ) {  // 
@@ -51,21 +67,6 @@ void playingTones(uint8_t timeSeconde) {
           started = false;
         }
       }
-    }
-
-#else 
-    //ACTIVE_BUZZER
-    if (currentMillis - previousToneMillis <= timeSeconde*100) {
-        analogWrite(DIGITAL_PIN_BUZZER, 128);
-    }else if(currentMillis - previousToneMillis > timeSeconde*100 && currentMillis - previousToneMillis <= timeSeconde*200){
-        analogWrite(DIGITAL_PIN_BUZZER, 0);
-    }else if(currentMillis - previousToneMillis > timeSeconde*200 && currentMillis - previousToneMillis <= timeSeconde*300){
-        analogWrite(DIGITAL_PIN_BUZZER, 128);
-    }else if(currentMillis - previousToneMillis > timeSeconde*300 && currentMillis - previousToneMillis <= 5000){
-        analogWrite(DIGITAL_PIN_BUZZER, 0);
-    }else{
-        previousToneMillis = currentMillis;     // save the last time buzzer play tone
-        analogWrite(DIGITAL_PIN_BUZZER, 0);
     }
  #endif   
     

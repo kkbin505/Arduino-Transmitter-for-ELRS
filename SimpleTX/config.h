@@ -28,6 +28,7 @@
 #define ADC_MID 511
 #define ADC_MAX 1023
 
+#define USE_3POS_SWITCH_AS_CHANNEL_6
 
 #define ANALOG_CUTOFF 150 // cut off lower and upper end to avoid un-symmetric joystick range in trade off resolution
 
@@ -63,18 +64,24 @@ const int VOLTAGE_READ_PIN = A0;
 
 // pins that used for the switch
 const int DIGITAL_PIN_SWITCH_ARM = 4;  // Arm switch
-const int DIGITAL_PIN_SWITCH_AUX2_HIGH = 3; // 3 stage switch for mode setup
-const int DIGITAL_PIN_SWITCH_AUX2_LOW = 8; //
+#ifdef USE_3POS_SWITCH_AS_CHANNEL_6
+    const int DIGITAL_PIN_SWITCH_AUX2_HIGH = 3; // 3 stage switch for mode setup
+    const int DIGITAL_PIN_SWITCH_AUX2_LOW = 8; //
+#else
+    const int DIGITAL_PIN_SWITCH_AUX2 = 3;
+#endif
 const int DIGITAL_PIN_SWITCH_AUX3 = 2;  //
-const int DIGITAL_PIN_SWITCH_AUX4 = 5;  //
+// If the following line is uncommented, the 3 position switch will send low/mid/high on channel 6
+// Alternatively it will send one position as Ch6 high, middle as nothing, 3rd position as ch7 high 
+const int DIGITAL_PIN_SWITCH_AUX4 = 5;  //set to 0 if not use AUX4
 
 // pins that used for output
 const int DIGITAL_PIN_LED = 7;  
 
 // pins that used for buzzer
 // Active buzzer only plays one tone (often used on Flight controllers as a beeper)
-//#define ACTIVE_BUZZER
-#define PASSIVE_BUZZER
+#define ACTIVE_BUZZER
+//#define PASSIVE_BUZZER
 const int DIGITAL_PIN_BUZZER = 6;
 
 // If using a passive buzzer, you can enjoy an RTTTL melody on startup (set to "" to disable)
@@ -86,9 +93,9 @@ const char * STICK_MOVE_WARNING ="tetris:d=4,o=5,b=160:e6,8b,8c6,8d6,16e6,16d6,8
 #endif
 //----- Voltage monitoring -------------------------
 // Define battery warning voltage
-const float VOLTAGE_SCALE = 111.0;
-const float WARNING_VOLTAGE = 7.4; // 2S Lipo 3.7v per cell LED will flash
-const float BEEPING_VOLTAGE = 7.0; // 2S Lipo 3.5v per cell Beep voltage
+const float VOLTAGE_SCALE = 103.0;
+const float WARNING_VOLTAGE = 7.4; // 2S Lipo 3.7v per cell
+const float BEEPING_VOLTAGE = 7.0; // 2S Lipo 3.5v per cell
 const float ON_USB = 5.2;          // On USB power / no battery
 
 // Define Commond for start Up Setting
@@ -136,7 +143,7 @@ enum chan_order
     THROTTLE,
     RUDDER,
     AUX1, // (CH5)  ARM switch for Expresslrs
-    AUX2, // (CH6)  angel / airmode /manual mode 3 postion switch
+    AUX2, // (CH6)  angel / airmode change
     AUX3, // (CH7)  flip after crash
     AUX4, // (CH8)
     AUX5, // (CH9)

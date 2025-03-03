@@ -42,8 +42,13 @@ int previous_throttle = 191;
 int loopCount = 0; // for ELRS seeting
 
 int AUX1_Arm = 0; // switch values read from the digital pin
-int AUX2_value_LOW = 0;
-int AUX2_value_HIGH = 0;
+#ifdef USE_3POS_SWITCH_AS_CHANNEL_6
+    int AUX2_value_HIGH= 0;
+    int AUX2_value_LOW = 0;
+#else
+    int AUX2_value_LOW = 0;
+#endif
+int AUX2_value = 0;
 int AUX3_value = 0;
 int AUX4_value = 0;
 
@@ -387,8 +392,12 @@ void setup()
 
     analogReference(EXTERNAL);
     pinMode(DIGITAL_PIN_SWITCH_ARM, INPUT_PULLUP);
-    pinMode(DIGITAL_PIN_SWITCH_AUX2_HIGH, INPUT_PULLUP);
-    pinMode(DIGITAL_PIN_SWITCH_AUX2_LOW, INPUT_PULLUP);
+    #ifdef USE_3POS_SWITCH_AS_CHANNEL_6
+        pinMode(DIGITAL_PIN_SWITCH_AUX2_HIGH, INPUT_PULLUP);
+        pinMode(DIGITAL_PIN_SWITCH_AUX2_LOW, INPUT_PULLUP);
+    #else
+        pinMode(DIGITAL_PIN_SWITCH_AUX2, INPUT_PULLUP);
+    #endif
     pinMode(DIGITAL_PIN_SWITCH_AUX3, INPUT_PULLUP);
     if (DIGITAL_PIN_SWITCH_AUX4 != 0){
       pinMode(DIGITAL_PIN_SWITCH_AUX4, INPUT_PULLUP);
@@ -426,9 +435,18 @@ void setup()
      delay(2000); // Give enough time for uploading firmware (2 seconds)     
     }
 #else  
-    // passive buzzer, no startup tone
+    digitalWrite(DIGITAL_PIN_BUZZER, LOW); //BUZZER ON
+    delay(100); // beep
+    digitalWrite(DIGITAL_PIN_BUZZER, HIGH); //BUZZER OFF
+    delay(200);
+    digitalWrite(DIGITAL_PIN_BUZZER, LOW); //BUZZER ON
+    delay(100); // beep
+    digitalWrite(DIGITAL_PIN_BUZZER, HIGH); //BUZZER OFF
+    delay(200);
+    digitalWrite(DIGITAL_PIN_BUZZER, LOW); //BUZZER ON
+    delay(200); // beep
+    digitalWrite(DIGITAL_PIN_BUZZER, HIGH); //BUZZER OFF
     delay(2000); // Give enough time for uploading firmware (2 seconds)
-    // digitalWrite(DIGITAL_PIN_BUZZER, HIGH); //BUZZER OFF
 #endif
 
     #ifdef DEBUG
@@ -464,14 +482,14 @@ void loop()
     uint32_t currentMicros = micros();
 
     // Read Voltage
-    batteryVoltage = analogRead(VOLTAGE_READ_PIN) / VOLTAGE_SCALE; // 98.5
+    batteryVoltage = analogRead(VOLTAGE_READ_PIN) / VOLTAGE_SCALE; //98.5
 #ifdef DEBUG
     Serial.print("batteryVoltage:");
     Serial.print(batteryVoltage);
     Serial.print("v ");
 #endif
     if (batteryVoltage < WARNING_VOLTAGE && batteryVoltage >= BEEPING_VOLTAGE) {
-        blinkLED(DIGITAL_PIN_LED, 500);
+        blinkLED(DIGITAL_PIN_LED, 1000);
     }else if(batteryVoltage < BEEPING_VOLTAGE && batteryVoltage >= ON_USB){
         blinkLED(DIGITAL_PIN_LED, 250);
         playingTones(2);
@@ -556,19 +574,12 @@ void loop()
      * Handel digital input
      */
     AUX1_Arm = digitalRead(DIGITAL_PIN_SWITCH_ARM);
-    if (Is_Rudder_Reverse == 1) {
-      AUX1_Arm = ~AUX1_Arm;
-    }
-    AUX2_value_LOW = digitalRead(DIGITAL_PIN_SWITCH_AUX2_LOW);
-    AUX2_value_HIGH = digitalRead(DIGITAL_PIN_SWITCH_AUX2_HIGH);
-
-    if (AUX2_value_HIGH== 0){
-        rcChannels[AUX2] = CRSF_DIGITAL_CHANNEL_MIN;
-      }else if( AUX2_value_LOW == 0){
-        rcChannels[AUX2] = CRSF_DIGITAL_CHANNEL_MAX;
-      }else{
-        rcChannels[AUX2] = CRSF_DIGITAL_CHANNEL_MID;
-      }
+    #ifdef USE_3POS_SWITCH_AS_CHANNEL_6
+    AUX2_value_HIGH= digitalRead(DIGITAL_PIN_SWITCH_AUX2_HIGH);
+        AUX2_value_LOW = digitalRead(DIGITAL_PIN_SWITCH_AUX2_LOW);
+    #else
+        AUX2_value = digitalRead(DIGITAL_PIN_SWITCH_AUX2);
+    #endif
     AUX3_value = digitalRead(DIGITAL_PIN_SWITCH_AUX3);
     if (DIGITAL_PIN_SWITCH_AUX4 != 0){
       AUX4_value = digitalRead(DIGITAL_PIN_SWITCH_AUX4);
@@ -578,7 +589,14 @@ void loop()
     
     // Aux Channels
     rcChannels[AUX1] = (AUX1_Arm == 1)   ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-    rcChannels[AUX3] = (AUX3_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+    #ifdef USE_3POS_SWITCH_AS_CHANNEL_6
+    rcChannels[AUX2] = (AUX2_value_HIGH == 0) ? CRSF_DIGITAL_CHANNEL_MAX :
+    (AUX2_value_LOW == 0) ? CRSF_DIGITAL_CHANNEL_MIN :
+     CRSF_DIGITAL_CHANNEL_MID;
+    #else
+      rcChannels[AUX2] = (AUX2_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+      rcChannels[AUX3] = (AUX3_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
+    #endif
     if (DIGITAL_PIN_SWITCH_AUX4 != 0){
       rcChannels[AUX4] = (AUX4_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
     }
