@@ -29,6 +29,13 @@ It was tested for ELRS 1.0 and 2.0.
 
 ### Update:
 
+### 2024/10/4 testing ELRS 3.0 support 
+
+Thanks to the great joby done by Tokyo_Dom, now I am testing ELRS 3.0 support. Will release soon.
+
+https://github.com/dbloemhard/Arduino-Transmitter-for-ELRS3.x
+
+
 ### 2025/2/12 Add support for ELRS 3.0
 Thanks to the great work doing by dbloemhard now the SimpleTX support 3.0, I merged the update into the main branch.
 You can change pocket rate, power and tune on/off dynamic power by gesutre.
