@@ -67,7 +67,6 @@ public:
     void CrsfWritePacket(uint8_t packet[], uint8_t packetLength);
 };
 
-<<<<<<< Updated upstream
 /* ESP32 Team900
 https://github.com/danxdz/simpleTx_esp32/blob/master/src/Simple_TX.ino
         // buildElrsPacket(crsfCmdPacket,X,3);
@@ -94,6 +93,3 @@ https://github.com/danxdz/simpleTx_esp32/blob/master/src/Simple_TX.ino
         // 19: Set Lua [Bad/Good]=0
         // 20: Set Lua [2.1.0 EU868]=0 =1 ?? get
 */
-=======
-
->>>>>>> Stashed changes

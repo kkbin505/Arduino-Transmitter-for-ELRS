@@ -38,21 +38,24 @@ int Throttle_value = 0;
 int Rudder_value = 0;
 int previous_throttle = 191;
 
-int loopCount = 0; // for ELRS seting
+int loopCount = 0; // for ELRS seeting
 
 int AUX1_Arm = 0; // switch values read from the digital pin
 int AUX2_value = 0;
 int AUX3_value = 0;
 int AUX4_value = 0;
+
 float batteryVoltage;
+
 int currentPktRate = 0;
 int currentPower = 0;
 int currentSetting = 0;
-int currentDynamic = 0;
 int stickMoved = 0;
 int stickInt = 0;
 uint32_t stickMovedMillis = 0;
+
 uint32_t currentMillis = 0;
+
 uint8_t crsfPacket[CRSF_PACKET_SIZE];
 uint8_t crsfCmdPacket[CRSF_CMD_PACKET_SIZE];
 int16_t rcChannels[CRSF_MAX_CHANNEL];
@@ -323,31 +326,18 @@ void calibrationRun(int aux1, int aux2) {
 void selectSetting() {
     // startup stick commands (protocol selection / renew transmitter ID)
 
-<<<<<<< Updated upstream
     if (rcChannels[AILERON] < RC_MIN_COMMAND && rcChannels[ELEVATOR] < RC_MIN_COMMAND) { // Elevator down + aileron left
-=======
-    if (rcChannels[AILERON] < RC_MIN_COMMAND && rcChannels[ELEVATOR] > RC_MAX_COMMAND) { // Elevator up + aileron right
->>>>>>> Stashed changes
         currentPktRate = SETTING_1_PktRate;
         currentPower = SETTING_1_Power;
-        currentDynamic = SETTING_1_Dynamic;
         currentSetting = 1;
-    } else if (rcChannels[AILERON] > RC_MAX_COMMAND && rcChannels[ELEVATOR] > RC_MAX_COMMAND) { // Elevator up + aileron left
+    } else if (rcChannels[AILERON] > RC_MAX_COMMAND && rcChannels[ELEVATOR] > RC_MAX_COMMAND) { // Elevator up + aileron right
         currentPktRate = SETTING_2_PktRate;
         currentPower = SETTING_2_Power;
-        currentDynamic = SETTING_2_Dynamic;
         currentSetting = 2;
-<<<<<<< Updated upstream
     } else if (rcChannels[AILERON] < RC_MIN_COMMAND && rcChannels[ELEVATOR] > RC_MAX_COMMAND) { // Elevator up + aileron right
         currentPktRate = SETTING_3_PktRate;
         currentPower = SETTING_3_Power;
         currentSetting = 3;
-=======
-    } else if (rcChannels[AILERON] < RC_MIN_COMMAND && rcChannels[ELEVATOR] < RC_MIN_COMMAND) { // Elevator down + aileron right
-        currentSetting = 3; // Bind to RX
-    } else if (rcChannels[AILERON] > RC_MAX_COMMAND && rcChannels[ELEVATOR] < RC_MIN_COMMAND) { // Elevator down + aileron left
-        currentSetting = 4;  // Start TX Wifi
->>>>>>> Stashed changes
     } else {
         currentSetting = 0;
     }
@@ -522,11 +512,7 @@ void loop()
     rcChannels[AUX1] = (AUX1_Arm == 1)   ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
     rcChannels[AUX2] = (AUX2_value == 1) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
     rcChannels[AUX3] = (AUX3_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-<<<<<<< Updated upstream
     // rcChannels[AUX4] = (AUX4_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
-=======
-    rcChannels[AUX4] = (AUX4_value == 0) ? CRSF_DIGITAL_CHANNEL_MIN : CRSF_DIGITAL_CHANNEL_MAX;
->>>>>>> Stashed changes
 
     if(stickInt=0){
         previous_throttle=rcChannels[THROTTLE];
@@ -565,15 +551,6 @@ void loop()
                     crsfClass.crsfPrepareCmdPacket(crsfCmdPacket, ELRS_PKT_RATE_COMMAND, currentPktRate);
                     // buildElrsPacket(crsfCmdPacket,ELRS_WIFI_COMMAND,0x01);
                     crsfClass.CrsfWritePacket(crsfCmdPacket, CRSF_CMD_PACKET_SIZE);
-<<<<<<< Updated upstream
-=======
-                } else if (currentSetting == 3) {
-                    crsfClass.crsfPrepareCmdPacket(crsfCmdPacket, ELRS_BIND_COMMAND, ELRS_START_COMMAND);
-                    crsfClass.CrsfWritePacket(crsfCmdPacket, CRSF_CMD_PACKET_SIZE);
-                } else if (currentSetting == 4) {
-                    crsfClass.crsfPrepareCmdPacket(crsfCmdPacket, ELRS_WIFI_COMMAND, ELRS_START_COMMAND);
-                    crsfClass.CrsfWritePacket(crsfCmdPacket, CRSF_CMD_PACKET_SIZE);
->>>>>>> Stashed changes
                 }
                 loopCount++;
             } else if (loopCount > 505 && loopCount < 510) { // repeat 10 packets to avoid bad packet, change TX power level
@@ -583,15 +560,10 @@ void loop()
                     crsfClass.CrsfWritePacket(crsfCmdPacket, CRSF_CMD_PACKET_SIZE);
                 }
                 loopCount++;
-            } else if (loopCount > 510 && loopCount <= 515) { // repeat 5 packets to avoid bad packet, change TX dynamic power setting
-                if (currentSetting == 1 || currentSetting == 2) {
-                    crsfClass.crsfPrepareCmdPacket(crsfCmdPacket, ELRS_DYNAMIC_POWER_COMMAND, currentDynamic);
-                    crsfClass.CrsfWritePacket(crsfCmdPacket, CRSF_CMD_PACKET_SIZE);
-                }
-                loopCount++;
             } else {
                 crsfClass.crsfPrepareDataPacket(crsfPacket, rcChannels);
                 crsfClass.CrsfWritePacket(crsfPacket, CRSF_PACKET_SIZE);
+
             }
         #endif
         crsfTime = currentMicros + CRSF_TIME_BETWEEN_FRAMES_US;
