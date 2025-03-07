@@ -29,11 +29,33 @@ It was tested for ELRS 1.0 and 2.0.
 
 ### Update:
 
+### 2025/03/07 Update STL file to V2
+
+1. Redesign battery bay
+
+2. Add 2 additional switch postion, now support up to 10 channels
+
+3. Add buzzer hold
+
+This version is slight thicker then V1, because I enlarged the battery tray to support bigger batteries. And I redesigned the battery tray cover, now it is clip on.
+
+![SimpleTX_V2](https://github.com/user-attachments/assets/0ff9ad77-3488-408c-a4b3-d2a0daaffb8a)
+
+![SimpleTX_V2_Battery](https://github.com/user-attachments/assets/8c68900a-a139-49c6-9f36-e9c2819744a5)
+
+
+![battery_cover](https://github.com/user-attachments/assets/800b2b06-b9ff-4771-8fd6-f5cfa7a5a56c)
+
+
+
 ### 2025/03/04 Release ELRS 3.0 support
 
 Merge 3.0 support to main
+
 Fix buzzer issue
+
 Change channel 6 to 3 postion AUX
+
 
 
 ### 2025/2/12 Add support for ELRS 3.0
