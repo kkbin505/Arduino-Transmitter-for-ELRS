@@ -33,7 +33,7 @@ It was tested for ELRS 1.0 and 2.0.
 
 1. Redesign battery bay
 
-2. Add 2 additional switch postion, now support up to 10 channels
+2. Add 2 additional switch postion, now support up to 10 channels (The firmware is under test)
 
 3. Add buzzer hold
 
@@ -43,6 +43,7 @@ This version is slight thicker then V1, because I enlarged the battery tray to s
 
 ![SimpleTX_V2_Battery](https://github.com/user-attachments/assets/8c68900a-a139-49c6-9f36-e9c2819744a5)
 
+![SimpleTX_Module](https://github.com/user-attachments/assets/ab1801c1-266a-41e7-8c01-66b66d4fe646)
 
 ![battery_cover](https://github.com/user-attachments/assets/800b2b06-b9ff-4771-8fd6-f5cfa7a5a56c)
 
