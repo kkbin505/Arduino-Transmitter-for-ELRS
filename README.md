@@ -6,6 +6,8 @@ Add video:
 
 https://www.youtube.com/watch?v=BPLFkZUoV28
 
+https://youtu.be/SbP2VN8qS8w
+
 ### 2022/6/3 Optimize Calibration
 
 1. Add center stick calibration
