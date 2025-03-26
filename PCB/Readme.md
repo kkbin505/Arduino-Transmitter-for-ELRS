@@ -3,7 +3,7 @@ Add PCB V0.9
 BOM :
 1. Frsky M7 Gimbal *2
 2. Arduino Nano
-3. XH2.45 3P *6
+3. XH2.54 3P *6
 4. PH2.0 2P
 5. 1.25 6P
 6. 2 Position Switch *5
